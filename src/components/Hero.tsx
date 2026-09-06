@@ -14,7 +14,7 @@ export function Hero() {
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-serif font-bold text-onBackground mb-6 leading-tight">
             Лучшие салоны. <br />
-            <span className="text-primary italic">В одном приложении.</span>
+            <span className="text-primary italic">В одном месте.</span>
           </h1>
 
           <p className="text-xl text-onSurfaceVariant mb-10 leading-relaxed">
@@ -26,7 +26,7 @@ export function Hero() {
             <button
               type="button"
               className="w-full sm:w-auto bg-primary text-onPrimary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primaryVariant transition-colors shadow-[0_0_20px_rgba(212,175,55,0.4)]"
-              onClick={openBooking}
+              onClick={() => openBooking()}
             >
               Найти салон
             </button>

@@ -42,3 +42,7 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Uploads
+/public/uploads/*
+!/public/uploads/.gitkeep

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Scissors,
   Camera,
@@ -8,10 +6,8 @@ import {
   Phone,
   Clock,
 } from "lucide-react";
-import { useBooking } from "@/components/BookingProvider";
 
 export function Footer() {
-  const { openBooking } = useBooking();
   const year = new Date().getFullYear();
 
   return (
@@ -22,7 +18,7 @@ export function Footer() {
             <div className="flex items-center gap-2 mb-6">
               <Scissors className="h-8 w-8 text-primary" />
               <span className="text-2xl font-serif font-bold text-onBackground tracking-wide">
-                BARBER<span className="text-primary">HUB</span>
+                SALON<span className="text-primary">HUB</span>
               </span>
             </div>
             <p className="text-onSurfaceVariant mb-6">
@@ -77,15 +73,15 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#services"
+                  href="/"
                   className="text-onSurfaceVariant hover:text-primary transition-colors"
                 >
-                  О сервисе
+                  Главная
                 </a>
               </li>
               <li>
                 <a
-                  href="#barbershops"
+                  href="/salons"
                   className="text-onSurfaceVariant hover:text-primary transition-colors"
                 >
                   Салоны
@@ -107,13 +103,12 @@ export function Footer() {
             <p className="text-onSurfaceVariant mb-4">
               Запишитесь онлайн в любое удобное время.
             </p>
-            <button
-              type="button"
-              className="w-full bg-primary text-onPrimary px-6 py-3 rounded-xl font-bold hover:bg-primaryVariant transition-colors"
-              onClick={openBooking}
+            <a
+              href="/salons"
+              className="w-full bg-primary text-onPrimary px-6 py-3 rounded-xl font-bold hover:bg-primaryVariant transition-colors text-center block"
             >
               Онлайн запись
-            </button>
+            </a>
           </div>
         </div>
 

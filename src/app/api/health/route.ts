@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   return NextResponse.json({
     status: "Healthy",
-    service: "BarberBooking.Next",
+    service: "barber-booking-network",
     timestampUtc: new Date().toISOString(),
   });
 }

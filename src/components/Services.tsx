@@ -91,7 +91,7 @@ export function Services() {
                 <button
                   type="button"
                   className="text-primary hover:text-primaryVariant font-semibold text-sm transition-colors"
-                  onClick={openBooking}
+                  onClick={() => openBooking()}
                 >
                   Найти салон →
                 </button>

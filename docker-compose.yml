@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: barber_network
+    ports:
+      - "5433:5432"
+    volumes:
+      - barber_network_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d barber_network"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://admin:secret@postgres:5432/barber_network?schema=public
+      JWT_SECRET: change-this-to-a-long-dev-secret-key-32chars!
+      APP_TIMEZONE: Europe/Moscow
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  barber_network_pg:

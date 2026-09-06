@@ -1,6 +1,7 @@
 "use client";
 
 import { Scissors } from "lucide-react";
+import Link from "next/link";
 import { useBooking } from "@/components/BookingProvider";
 
 export function Navbar() {
@@ -37,10 +38,16 @@ export function Navbar() {
               >
                 Контакты
               </a>
+              <Link
+                href="/login"
+                className="text-onSurfaceVariant hover:text-primary transition-colors"
+              >
+                Войти
+              </Link>
               <button
                 type="button"
                 className="bg-primary text-onPrimary px-6 py-2.5 rounded-xl font-semibold hover:bg-primaryVariant transition-colors shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_20px_rgba(212,175,55,0.5)]"
-                onClick={openBooking}
+                onClick={() => openBooking()}
               >
                 Найти салон
               </button>
@@ -50,7 +57,7 @@ export function Navbar() {
           <button
             type="button"
             className="md:hidden bg-primary text-onPrimary px-4 py-2 rounded-xl font-semibold text-sm"
-            onClick={openBooking}
+            onClick={() => openBooking()}
           >
             Найти салон
           </button>

@@ -1,225 +1,150 @@
 "use client";
 
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { TrendingUp, Users, CalendarCheck, Scissors } from "lucide-react";
+import { apiFetch } from "@/lib/client-api";
+import { CalendarCheck, Users, Scissors } from "lucide-react";
 
-const stats = [
-  { label: "Записей сегодня", value: "24", trend: "+4", icon: CalendarCheck },
-  { label: "Выручка за день", value: "38 500 ₽", trend: "+12%", icon: TrendingUp },
-  { label: "Новых клиентов", value: "6", trend: "+2", icon: Users },
-  { label: "Специалистов на смене", value: "3 / 4", trend: "0", icon: Scissors },
-];
+type AppointmentView = {
+  id: string;
+  startTime: string;
+  clientName: string;
+  masterName: string;
+  serviceName: string;
+  status: string;
+};
 
-const recentBookings = [
-  {
-    id: "1023",
-    client: "Михаил С.",
-    barber: "Александр",
-    service: "Стрижка + Борода",
-    time: "10:00",
-    status: "Завершено",
-  },
-  {
-    id: "1024",
-    client: "Артем В.",
-    barber: "Александр",
-    service: "Мужская стрижка",
-    time: "11:30",
-    status: "В работе",
-  },
-  {
-    id: "1025",
-    client: "Дмитрий К.",
-    barber: "Михаил",
-    service: "Королевское бритье",
-    time: "12:00",
-    status: "Ожидает",
-  },
-  {
-    id: "1026",
-    client: "Олег Д.",
-    barber: "Александр",
-    service: "Моделирование бороды",
-    time: "13:00",
-    status: "Ожидает",
-  },
-];
-
-export function AdminDashboard() {
+export function AdminDashboard({
+  name,
+  appointments,
+  mastersCount,
+  needsSalon = false,
+}: {
+  name: string;
+  appointments: AppointmentView[];
+  mastersCount: number;
+  needsSalon?: boolean;
+}) {
   return (
-    <DashboardLayout role="admin">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <DashboardLayout role="admin" name={name}>
+      {needsSalon ? (
+        <CreateSalonForm />
+      ) : (
+        <div className="max-w-7xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold font-serif mb-2">
-              Сводка салона
-            </h1>
-            <p className="text-onSurfaceVariant">
-              Обзор показателей вашего салона на сегодня
-            </p>
+            <h1 className="text-3xl font-bold font-serif mb-2">Сводка салона</h1>
+            <p className="text-onSurfaceVariant">{name}</p>
           </div>
-          <button
-            type="button"
-            className="bg-primary text-onPrimary px-4 py-2 rounded-lg font-medium hover:bg-primaryVariant transition-colors"
-          >
-            + Создать запись вручную
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className="bg-card border border-outline p-6 rounded-2xl"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-surfaceVariant flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${
-                      stat.trend.startsWith("+")
-                        ? "text-success"
-                        : "text-onSurfaceVariant"
-                    }`}
-                  >
-                    {stat.trend}
-                  </span>
-                </div>
-                <h3 className="text-onSurfaceVariant text-sm font-medium mb-1">
-                  {stat.label}
-                </h3>
-                <p className="text-2xl font-bold text-onBackground">
-                  {stat.value}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-card border border-outline rounded-2xl overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-outline flex justify-between items-center">
-              <h2 className="text-xl font-bold">Последние записи</h2>
-              <button
-                type="button"
-                className="text-sm text-primary hover:underline"
-              >
-                Смотреть все
-              </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-card border border-outline p-6 rounded-2xl">
+              <CalendarCheck className="w-5 h-5 text-primary mb-3" />
+              <p className="text-onSurfaceVariant text-sm">Записей сегодня</p>
+              <p className="text-2xl font-bold">{appointments.length}</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-surfaceVariant/50 text-onSurfaceVariant text-sm">
-                    <th className="p-4 font-medium">ID</th>
-                    <th className="p-4 font-medium">Время</th>
-                    <th className="p-4 font-medium">Клиент</th>
-                    <th className="p-4 font-medium">Специалист</th>
-                    <th className="p-4 font-medium">Статус</th>
+            <div className="bg-card border border-outline p-6 rounded-2xl">
+              <Scissors className="w-5 h-5 text-primary mb-3" />
+              <p className="text-onSurfaceVariant text-sm">Мастеров</p>
+              <p className="text-2xl font-bold">{mastersCount}</p>
+            </div>
+            <div className="bg-card border border-outline p-6 rounded-2xl">
+              <Users className="w-5 h-5 text-primary mb-3" />
+              <p className="text-onSurfaceVariant text-sm">Подтверждено</p>
+              <p className="text-2xl font-bold">
+                {appointments.filter((a) => a.status === "Confirmed").length}
+              </p>
+            </div>
+          </div>
+          <div className="bg-card border border-outline rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-outline">
+              <h2 className="text-xl font-bold">Записи сегодня</h2>
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-surfaceVariant/50 text-onSurfaceVariant text-sm">
+                  <th className="p-4">Время</th>
+                  <th className="p-4">Клиент</th>
+                  <th className="p-4">Мастер</th>
+                  <th className="p-4">Статус</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline">
+                {appointments.length === 0 && (
+                  <tr>
+                    <td className="p-4 text-onSurfaceVariant" colSpan={4}>
+                      На сегодня записей нет
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-outline">
-                  {recentBookings.map((b) => (
-                    <tr
-                      key={b.id}
-                      className="hover:bg-surfaceVariant/30 transition-colors"
-                    >
-                      <td className="p-4 text-sm font-mono text-onSurfaceVariant">
-                        #{b.id}
-                      </td>
-                      <td className="p-4 font-medium">{b.time}</td>
-                      <td className="p-4">
-                        <p className="font-bold">{b.client}</p>
-                        <p className="text-xs text-onSurfaceVariant">
-                          {b.service}
-                        </p>
-                      </td>
-                      <td className="p-4">{b.barber}</td>
-                      <td className="p-4">
-                        <span
-                          className={`inline-block px-2.5 py-1 text-xs font-medium rounded-full ${
-                            b.status === "Завершено"
-                              ? "bg-success/10 text-success border border-success/20"
-                              : b.status === "В работе"
-                                ? "bg-primary/10 text-primary border border-primary/20"
-                                : "bg-surfaceVariant text-onSurface border border-outline"
-                          }`}
-                        >
-                          {b.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="bg-card border border-outline rounded-2xl p-6">
-            <h2 className="text-xl font-bold mb-6">Статус специалистов</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-xl border border-primary/30 bg-primary/5">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-surfaceVariant flex items-center justify-center font-bold">
-                      А
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-card" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">Александр</p>
-                    <p className="text-xs text-primary">В работе (до 12:30)</p>
-                  </div>
-                </div>
-                <span className="text-xs font-medium px-2 py-1 bg-surfaceVariant rounded-md">
-                  8 записей
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl border border-outline hover:bg-surfaceVariant/30 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-surfaceVariant flex items-center justify-center font-bold">
-                      М
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-card" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">Михаил</p>
-                    <p className="text-xs text-success">Свободен</p>
-                  </div>
-                </div>
-                <span className="text-xs font-medium px-2 py-1 bg-surfaceVariant rounded-md">
-                  6 записей
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl border border-outline hover:bg-surfaceVariant/30 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-surfaceVariant flex items-center justify-center font-bold text-onSurfaceVariant">
-                      Д
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-outline rounded-full border-2 border-card" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-onSurfaceVariant">
-                      Давид
-                    </p>
-                    <p className="text-xs text-onSurfaceVariant">Выходной</p>
-                  </div>
-                </div>
-                <span className="text-xs font-medium px-2 py-1 bg-surfaceVariant rounded-md text-onSurfaceVariant">
-                  0 записей
-                </span>
-              </div>
-            </div>
+                )}
+                {appointments.map((b) => (
+                  <tr key={b.id}>
+                    <td className="p-4 font-medium">{b.startTime}</td>
+                    <td className="p-4">
+                      <p className="font-bold">{b.clientName}</p>
+                      <p className="text-xs text-onSurfaceVariant">{b.serviceName}</p>
+                    </td>
+                    <td className="p-4">{b.masterName}</td>
+                    <td className="p-4">{b.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      )}
     </DashboardLayout>
+  );
+}
+
+function CreateSalonForm() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setPending(true);
+    const form = new FormData(event.currentTarget);
+    const response = await apiFetch("/api/salons", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.get("name"),
+        city: form.get("city"),
+        street: form.get("street"),
+        building: form.get("building"),
+        phone: form.get("phone") || undefined,
+        openingTime: "10:00",
+        closingTime: "20:00",
+      }),
+    });
+    const payload = await response.json();
+    setPending(false);
+    if (!response.ok) {
+      setError(payload.error ?? "Не удалось создать салон");
+      return;
+    }
+    router.refresh();
+  }
+
+  return (
+    <div className="max-w-lg space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold font-serif mb-2">Создайте салон</h1>
+        <p className="text-onSurfaceVariant">После регистрации нужно добавить карточку салона.</p>
+      </div>
+      <form className="space-y-4" onSubmit={onSubmit}>
+        {error && <p className="text-sm text-error">{error}</p>}
+        <input name="name" required placeholder="Название" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
+        <input name="city" required placeholder="Город" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
+        <input name="street" required placeholder="Улица" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
+        <input name="building" required placeholder="Дом" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
+        <input name="phone" placeholder="Телефон" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
+        <button type="submit" disabled={pending} className="w-full bg-primary text-onPrimary font-bold py-3.5 rounded-xl">
+          {pending ? "Сохранение..." : "Создать салон"}
+        </button>
+      </form>
+    </div>
   );
 }
