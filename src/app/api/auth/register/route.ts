@@ -9,6 +9,7 @@ export async function POST(request: Request) {
       email: string;
       phone: string;
       password: string;
+      city: string;
       role?: (typeof UserRole)[keyof typeof UserRole];
     }>(request);
     const includeCode = process.env.NODE_ENV !== "production";

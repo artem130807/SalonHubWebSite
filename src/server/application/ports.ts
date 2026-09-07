@@ -58,6 +58,12 @@ export interface IVerificationCodeGenerator {
   generate(length?: number): string;
 }
 
+export interface ICityCatalog {
+  isValid(cityName: string): boolean;
+  canonical(cityName: string): string | null;
+  list(prefix?: string): string[];
+}
+
 export interface IUserRepository {
   getById(id: string): Promise<User | null>;
   getByEmail(email: string): Promise<User | null>;
@@ -109,7 +115,7 @@ export interface IMasterProfileRepository {
   getByUserId(userId: string): Promise<MasterProfile | null>;
   getBySalonId(salonId: string): Promise<MasterProfile[]>;
   listIds(): Promise<string[]>;
-  listTopRated(limit: number): Promise<MasterProfile[]>;
+  listTopRated(limit: number, city?: string): Promise<MasterProfile[]>;
   add(profile: MasterProfile): Promise<void>;
   update(profile: MasterProfile): Promise<void>;
   updateRating(id: string, rating: number, ratingCount: number): Promise<void>;

@@ -47,18 +47,20 @@ export function HomeDiscover({
           <h1 className="text-5xl sm:text-7xl font-serif font-bold leading-tight mb-8">
             Лучшие салоны. <br className="hidden sm:block" /><span className="text-primary italic">В одном месте.</span>
           </h1>
-          <form action="/salons" className="max-w-2xl mt-8">
-            <label className="flex items-center gap-3 bg-surface/80 backdrop-blur-md border border-outline hover:border-primary/50 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 rounded-2xl p-2 transition-all shadow-lg">
-              <Search className="w-6 h-6 text-onSurfaceVariant ml-3" />
-              <input
-                name="q"
-                placeholder="Название, улица или город..."
-                className="flex-1 bg-transparent outline-none text-lg py-2 placeholder:text-onSurfaceVariant"
-              />
-              <button type="submit" className="bg-primary text-onPrimary px-8 py-3.5 rounded-xl font-bold hover:bg-primaryVariant transition-colors">
+          <form action="/salons" className="max-w-4xl mt-12 w-full relative z-10 mx-auto">
+            <div className="flex flex-col md:flex-row items-center bg-surface/80 backdrop-blur-xl border border-outline/50 rounded-[2rem] p-2 shadow-2xl transition-all hover:shadow-primary/5 hover:border-primary/30">
+              <label className="flex items-center gap-4 flex-1 w-full px-6 py-4 group">
+                <Search className="w-7 h-7 text-onSurfaceVariant group-focus-within:text-primary transition-colors" />
+                <input
+                  name="q"
+                  placeholder="Поиск салона, услуги или мастера..."
+                  className="w-full bg-transparent outline-none text-xl placeholder:text-onSurfaceVariant/70"
+                />
+              </label>
+              <button type="submit" className="w-full md:w-auto bg-primary text-onPrimary px-12 py-5 md:ml-2 rounded-3xl font-bold text-xl hover:bg-primaryVariant transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)]">
                 Найти
               </button>
-            </label>
+            </div>
           </form>
         </div>
       </section>
@@ -91,7 +93,7 @@ export function HomeDiscover({
           <div className="flex justify-between items-end mb-8 gap-4">
             <div>
               <h2 className="text-3xl sm:text-4xl font-serif font-bold">
-                {city ? `Салоны в городе ${city}` : "Салоны в вашем городе"}
+                {city ? `Салоны в городе ${city}` : "Салоны"}
               </h2>
               <p className="text-onSurfaceVariant mt-2">Выберите салон, мастера и удобное время</p>
             </div>
@@ -100,7 +102,9 @@ export function HomeDiscover({
             </Link>
           </div>
           {salons.length === 0 ? (
-            <p className="text-onSurfaceVariant">Салоны появятся после наполнения каталога.</p>
+            <p className="text-onSurfaceVariant">
+              {city ? "Салоны в вашем городе не найдены." : "Салоны появятся после наполнения каталога."}
+            </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {salons.map((salon) => (

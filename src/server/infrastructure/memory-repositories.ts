@@ -134,9 +134,9 @@ export class InMemorySalonRepository implements ISalonRepository {
     const city = query?.city?.trim().toLowerCase();
     return this.db.salons.filter((salon) => {
       if (!salon.isActive) return false;
-      if (city && !salon.city.toLowerCase().includes(city)) return false;
+      if (city && salon.city.toLowerCase() !== city) return false;
       if (name) {
-        const haystack = `${salon.name} ${salon.city} ${salon.street} ${salon.building}`.toLowerCase();
+        const haystack = `${salon.name} ${salon.street} ${salon.building}`.toLowerCase();
         if (!haystack.includes(name)) return false;
       }
       if (category) {
@@ -191,8 +191,15 @@ export class InMemoryMasterProfileRepository implements IMasterProfileRepository
   async listIds() {
     return this.db.masters.map((master) => master.id);
   }
-  async listTopRated(limit: number) {
-    return [...this.db.masters].sort((a, b) => b.rating - a.rating || b.ratingCount - a.ratingCount).slice(0, limit);
+  async listTopRated(limit: number, city?: string) {
+    const cityKey = city?.trim().toLowerCase();
+    const salonIds = cityKey
+      ? new Set(this.db.salons.filter((salon) => salon.city.toLowerCase() === cityKey).map((salon) => salon.id))
+      : null;
+    return [...this.db.masters]
+      .filter((master) => !salonIds || salonIds.has(master.salonId))
+      .sort((a, b) => b.ratingCount - a.ratingCount || b.rating - a.rating)
+      .slice(0, limit);
   }
   async add(profile: MasterProfile) {
     this.db.masters.push(profile);

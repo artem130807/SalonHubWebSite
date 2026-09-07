@@ -28,6 +28,7 @@ import type {
   IMasterProfileRepository,
   INotifier,
   IPasswordHasher,
+  ICityCatalog,
   IReviewRepository,
   ISalonAdminRepository,
   ISalonPhotoRepository,
@@ -637,6 +638,7 @@ export class ProfileService {
   constructor(
     private readonly users: IUserRepository,
     private readonly hasher: IPasswordHasher,
+    private readonly cityCatalog: ICityCatalog,
   ) {}
 
   async publicProfile(id: string) {
@@ -651,8 +653,8 @@ export class ProfileService {
   }
 
   async updateCity(userId: string, city: string) {
-    const next = city.trim();
-    if (!next) return err("Город обязателен");
+    const next = this.cityCatalog.canonical(city);
+    if (!next) return err("Вы указали неверный город");
     await this.users.updateCity(userId, next);
     return ok({ city: next });
   }
@@ -671,7 +673,7 @@ export class ProfileService {
   }
 
   async cities(prefix?: string) {
-    return ok(await this.users.listCities(prefix));
+    return ok(this.cityCatalog.list(prefix));
   }
 }
 

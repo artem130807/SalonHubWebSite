@@ -43,7 +43,7 @@ describe("AuthService", () => {
   it("requires email verification before login", async () => {
     const { auth } = app();
     const registered = await auth.register(
-      { name: "Иван", email: "ivan@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+      { name: "Иван", email: "ivan@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
       true,
     );
     expect(registered.ok).toBe(true);
@@ -59,7 +59,7 @@ describe("AuthService", () => {
   it("does not allow a master to self-register", async () => {
     const { auth } = app();
     const result = await auth.register(
-      { name: "Мастер", email: "master@test.com", phone: "+79991112233", password: "password1", role: UserRole.Master },
+      { name: "Мастер", email: "master@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Master },
       true,
     );
     expect(result.ok).toBe(false);
@@ -70,11 +70,11 @@ describe("booking flow", () => {
   it("lets a client book an available start and the master complete it", async () => {
     const services = app();
     const adminReg = await services.auth.register(
-      { name: "Админ", email: "admin@test.com", phone: "+79991112233", password: "password1", role: UserRole.SalonAdmin },
+      { name: "Админ", email: "admin@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.SalonAdmin },
       true,
     );
     const clientReg = await services.auth.register(
-      { name: "Клиент", email: "client@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+      { name: "Клиент", email: "client@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
       true,
     );
     expect(adminReg.ok && clientReg.ok).toBe(true);
@@ -160,11 +160,11 @@ describe("booking flow", () => {
   it("rejects a start inside the 15-minute lead time", async () => {
     const services = app(new Date("2026-09-10T10:00:00.000Z"));
     const adminReg = await services.auth.register(
-      { name: "Админ", email: "admin2@test.com", phone: "+79991112233", password: "password1", role: UserRole.SalonAdmin },
+      { name: "Админ", email: "admin2@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.SalonAdmin },
       true,
     );
     const clientReg = await services.auth.register(
-      { name: "Клиент", email: "client2@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+      { name: "Клиент", email: "client2@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
       true,
     );
     if (!adminReg.ok || !clientReg.ok) return;
@@ -212,11 +212,11 @@ describe("booking flow", () => {
   it("rejects a master from another salon", async () => {
     const services = app();
     const adminReg = await services.auth.register(
-      { name: "Админ", email: "admin3@test.com", phone: "+79991112233", password: "password1", role: UserRole.SalonAdmin },
+      { name: "Админ", email: "admin3@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.SalonAdmin },
       true,
     );
     const clientReg = await services.auth.register(
-      { name: "Клиент", email: "client3@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+      { name: "Клиент", email: "client3@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
       true,
     );
     if (!adminReg.ok || !clientReg.ok) return;

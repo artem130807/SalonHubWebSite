@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client-api";
+import { CitySuggest } from "@/components/site/CitySuggest";
 
 export function SettingsPanel({ name, city }: { name: string; city: string | null }) {
   const [message, setMessage] = useState("");
@@ -59,7 +60,7 @@ export function SettingsPanel({ name, city }: { name: string; city: string | nul
         <form className="space-y-4" onSubmit={saveCity}>
           <h2 className="text-xl font-serif font-bold">Город</h2>
           <div className="flex flex-col sm:flex-row gap-3">
-            <input name="city" defaultValue={city ?? ""} required placeholder="Ваш город..." className="flex-1 bg-background border border-outline rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all" />
+            <CitySuggest defaultValue={city ?? ""} placeholder="Начните вводить город России" className="flex-1" />
             <button className="bg-primary text-onPrimary font-bold rounded-xl px-6 py-3 hover:bg-primaryVariant transition-colors shadow-sm shrink-0">Сохранить</button>
           </div>
         </form>

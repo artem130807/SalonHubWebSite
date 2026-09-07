@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MapPin, Phone, Star } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { SalonBookingButton } from "@/components/site/SalonBookingButton";
+import { SalonMasterBookButton } from "@/components/site/SalonMasterBookButton";
 import { getApp } from "@/server/infrastructure/get-app";
 
 export const dynamic = "force-dynamic";
@@ -78,21 +79,16 @@ export default async function SalonPage({ params }: { params: Promise<{ id: stri
           {masterList.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Мастера пока не добавлены</p>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-5">
               {masterList.map((master) => (
-                <div key={master.id} className="bg-surface border border-outline rounded-3xl p-5 flex items-center gap-4 hover:border-primary/50 transition-colors shadow-sm">
-                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-serif text-xl font-bold shrink-0">
-                    {master.userName.slice(0, 1)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-lg">{master.userName}</p>
-                    <p className="text-sm text-onSurfaceVariant">{master.specialization || "Мастер"}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star className="w-3.5 h-3.5 text-primary fill-primary" />
-                      <span className="text-sm font-bold">{master.rating.toFixed(1)}</span>
-                    </div>
-                  </div>
-                </div>
+                <SalonMasterBookButton
+                  key={master.id}
+                  salonId={salon.id}
+                  masterId={master.id}
+                  masterName={master.userName}
+                  specialization={master.specialization}
+                  rating={master.rating}
+                />
               ))}
             </div>
           )}

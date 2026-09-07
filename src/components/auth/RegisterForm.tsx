@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { registerAction, type AuthFormState } from "@/app/actions/auth";
+import { CitySuggest } from "@/components/site/CitySuggest";
 
 const initial: AuthFormState = {};
 
@@ -24,6 +25,10 @@ export function RegisterForm() {
         <span className="text-sm font-medium">Телефон</span>
         <input name="phone" required placeholder="+79991112233" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3 outline-none focus:border-primary" />
       </label>
+      <div className="space-y-2">
+        <span className="text-sm font-medium">Город</span>
+        <CitySuggest placeholder="Начните вводить город России" />
+      </div>
       <label className="block space-y-2">
         <span className="text-sm font-medium">Пароль</span>
         <input name="password" type="password" required minLength={8} className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3 outline-none focus:border-primary" />

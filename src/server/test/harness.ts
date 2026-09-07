@@ -66,11 +66,11 @@ export function createTestApp(now = new Date("2026-09-03T08:00:00.000Z")) {
 export async function seedSalon(now = new Date("2026-09-03T08:00:00.000Z")) {
   const app = createTestApp(now);
   const adminReg = await app.auth.register(
-    { name: "Админ", email: "admin@test.com", phone: "+79991112233", password: "password1", role: UserRole.SalonAdmin },
+    { name: "Админ", email: "admin@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.SalonAdmin },
     true,
   );
   const clientReg = await app.auth.register(
-    { name: "Клиент", email: "client@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+    { name: "Клиент", email: "client@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
     true,
   );
   if (!adminReg.ok || !clientReg.ok) throw new Error("register failed");

@@ -15,6 +15,7 @@ const registerSchema = z.object({
   name: z.string().min(2, "Имя слишком короткое"),
   email: z.string().email("Некорректный email"),
   phone: z.string().min(10, "Укажите телефон"),
+  city: z.string().min(2, "Вы не указали город"),
   password: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
   role: z.enum(["Client", "SalonAdmin"]).default("Client"),
 });

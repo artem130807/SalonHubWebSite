@@ -45,3 +45,8 @@ dialog:not([open]) {
 ::-webkit-scrollbar-thumb:hover {
   background: #d4af37;
 }
+
+::selection {
+  background-color: #d4af37;
+  color: #1a1a1a;
+}

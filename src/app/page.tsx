@@ -8,16 +8,16 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const session = await getOptionalSession();
-  const city = session?.role === UserRole.Client ? session.city : null;
+  const city = session?.city || undefined;
   let salons: Awaited<ReturnType<ReturnType<typeof getApp>["salons"]["search"]>> = [];
   let masters: Awaited<ReturnType<ReturnType<typeof getApp>["masters"]["featured"]>> = { ok: true, value: [] };
   try {
-    salons = await getApp().salons.search({ city: city || undefined, sort: "rating" });
+    salons = await getApp().salons.search({ city, sort: "rating" });
   } catch {
     salons = [];
   }
   try {
-    masters = await getApp().masters.featured(4);
+    masters = await getApp().masters.featured(4, city);
   } catch {
     masters = { ok: true, value: [] };
   }

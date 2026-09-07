@@ -8,6 +8,7 @@ import {
 import { TimeSlotStatus, UserRole, type Salon } from "@/server/domain/types";
 import type {
   IAppointmentRepository,
+  ICityCatalog,
   IClock,
   IMasterTimeSlotRepository,
   ISalonAdminRepository,
@@ -36,6 +37,7 @@ export class SalonService {
     private readonly clock: IClock,
     private readonly photos: ISalonPhotoRepository,
     private readonly services: IServiceRepository,
+    private readonly cities: ICityCatalog,
   ) {}
 
   async search(query: SalonCatalogQuery = {}) {
@@ -98,11 +100,13 @@ export class SalonService {
     if (!input.name.trim() || !input.city.trim() || !input.street.trim() || !input.building.trim()) {
       return err("Название и адрес обязательны");
     }
+    const city = this.cities.canonical(input.city);
+    if (!city) return err("Вы указали неверный город");
     const salon: Salon = {
       id: randomUUID(),
       name: input.name.trim(),
       description: input.description?.trim() || null,
-      city: input.city.trim(),
+      city,
       street: input.street.trim(),
       building: input.building.trim(),
       phone: input.phone?.trim() || null,
@@ -124,11 +128,13 @@ export class SalonService {
     }
     const salon = await this.salons.getById(salonId);
     if (!salon) return err("Салон не найден");
+    const city = this.cities.canonical(input.city);
+    if (!city) return err("Вы указали неверный город");
     const next = {
       ...salon,
       name: input.name.trim(),
       description: input.description?.trim() || null,
-      city: input.city.trim(),
+      city,
       street: input.street.trim(),
       building: input.building.trim(),
       phone: input.phone?.trim() || null,

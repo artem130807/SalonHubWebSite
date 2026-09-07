@@ -2,6 +2,7 @@ import type {
   IAppointmentRepository,
   IChatMessageRepository,
   IClock,
+  ICityCatalog,
   IConversationRepository,
   IDailyStatsRepository,
   IEmailVerificationRepository,
@@ -26,6 +27,7 @@ import type {
   SessionPayload,
 } from "@/server/application/ports";
 import { AuthService } from "@/server/application/auth-service";
+import { getCityCatalog } from "@/server/application/city-catalog";
 import { CatalogService, MasterManagementService } from "@/server/application/master-catalog-service";
 import { SalonService } from "@/server/application/salon-service";
 import { AppointmentService, TimeSlotService } from "@/server/application/booking-services";
@@ -71,12 +73,14 @@ export type AppDeps = {
   codes: IVerificationCodeGenerator;
   clock: IClock;
   notifier?: INotifier;
+  cities?: ICityCatalog;
 };
 
 export type AppServices = ReturnType<typeof createApp>;
 
 export function createApp(deps: AppDeps) {
   const notifier = deps.notifier ?? silentNotifier;
+  const cities = deps.cities ?? getCityCatalog();
   const auth = new AuthService(
     deps.users,
     deps.verifications,
@@ -87,6 +91,7 @@ export function createApp(deps: AppDeps) {
     deps.tokens,
     deps.codes,
     deps.clock,
+    cities,
   );
   const salons = new SalonService(
     deps.salons,
@@ -97,6 +102,7 @@ export function createApp(deps: AppDeps) {
     deps.clock,
     deps.photos,
     deps.services,
+    cities,
   );
   const masters = new MasterManagementService(
     deps.masters,
@@ -141,7 +147,7 @@ export function createApp(deps: AppDeps) {
     deps.clock,
   );
   const photos = new PhotoService(deps.photos, deps.salonAdmins);
-  const profile = new ProfileService(deps.users, deps.hasher);
+  const profile = new ProfileService(deps.users, deps.hasher, cities);
 
   return {
     auth,

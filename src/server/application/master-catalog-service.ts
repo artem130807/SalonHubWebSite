@@ -39,8 +39,8 @@ export class MasterManagementService {
     return ok(await this.masterServices.getServicesForMaster(masterId));
   }
 
-  async featured(limit = 4) {
-    const masters = await this.masters.listTopRated(limit);
+  async featured(limit = 4, city?: string) {
+    const masters = await this.masters.listTopRated(limit, city);
     return ok(
       masters.map((master) => ({
         id: master.id,

@@ -50,14 +50,14 @@ export function SiteHeader({ viewer }: { viewer: SiteViewer }) {
             </span>
           </Link>
 
-          <form onSubmit={onSearch} className="hidden md:flex flex-1 max-w-xl">
-            <label className="flex items-center gap-3 w-full bg-surface/50 border border-outline rounded-2xl px-4 py-2.5 focus-within:border-primary focus-within:bg-surface transition-all">
-              <Search className="w-4 h-4 text-onSurfaceVariant" />
+          <form onSubmit={onSearch} className="hidden md:flex flex-1 max-w-3xl mx-8">
+            <label className="flex items-center gap-3 w-full bg-surface/40 hover:bg-surface/60 border border-outline/50 hover:border-outline rounded-2xl px-5 py-2.5 focus-within:border-primary focus-within:bg-surface focus-within:shadow-[0_0_15px_rgba(212,175,55,0.1)] transition-all">
+              <Search className="w-5 h-5 text-onSurfaceVariant" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Поиск салона..."
-                className="w-full bg-transparent outline-none text-sm placeholder:text-onSurfaceVariant"
+                placeholder="Поиск салона, услуги или мастера..."
+                className="w-full bg-transparent outline-none text-base placeholder:text-onSurfaceVariant/70"
               />
             </label>
           </form>
@@ -112,13 +112,13 @@ export function SiteHeader({ viewer }: { viewer: SiteViewer }) {
           </Link>
         </div>
         <form onSubmit={onSearch} className="md:hidden pb-4">
-          <label className="flex items-center gap-3 w-full bg-surface/50 border border-outline rounded-2xl px-4 py-3 focus-within:border-primary focus-within:bg-surface transition-all">
+          <label className="flex items-center gap-3 w-full bg-surface/40 hover:bg-surface/60 border border-outline/50 hover:border-outline rounded-2xl px-5 py-3 focus-within:border-primary focus-within:bg-surface focus-within:shadow-[0_0_15px_rgba(212,175,55,0.1)] transition-all">
             <Search className="w-5 h-5 text-onSurfaceVariant" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Поиск салона..."
-              className="w-full bg-transparent outline-none text-base placeholder:text-onSurfaceVariant"
+              placeholder="Поиск салона, услуги или мастера..."
+              className="w-full bg-transparent outline-none text-base placeholder:text-onSurfaceVariant/70"
             />
           </label>
         </form>

@@ -55,11 +55,11 @@ function app(now = new Date("2026-09-03T08:00:00.000Z")) {
 async function seed() {
   const services = app();
   const adminReg = await services.auth.register(
-    { name: "Админ", email: "admin@test.com", phone: "+79991112233", password: "password1", role: UserRole.SalonAdmin },
+    { name: "Админ", email: "admin@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.SalonAdmin },
     true,
   );
   const clientReg = await services.auth.register(
-    { name: "Клиент", email: "client@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+    { name: "Клиент", email: "client@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
     true,
   );
   if (!adminReg.ok || !clientReg.ok) throw new Error("register failed");
@@ -164,7 +164,7 @@ describe("platform reviews, walk-in, chat, templates", () => {
     expect(created.ok).toBe(true);
     if (!created.ok) return;
     const stranger = await services.auth.register(
-      { name: "Другой", email: "other@test.com", phone: "+79991112235", password: "password1", role: UserRole.Client },
+      { name: "Другой", email: "other@test.com", phone: "+79991112235", password: "password1", city: "Москва", role: UserRole.Client },
       true,
     );
     expect(stranger.ok).toBe(true);
@@ -348,6 +348,8 @@ describe("platform reviews, walk-in, chat, templates", () => {
     const { services, clientReg } = await seed();
     const city = await services.profile.updateCity(clientReg.value.userId, "Казань");
     expect(city.ok && city.value.city).toBe("Казань");
+    const invalidCity = await services.profile.updateCity(clientReg.value.userId, "Неттакогогорода");
+    expect(invalidCity.ok).toBe(false);
     const wrong = await services.profile.updatePassword(clientReg.value.userId, "nope", "password2");
     expect(wrong.ok).toBe(false);
     const okPass = await services.profile.updatePassword(clientReg.value.userId, "password1", "password2");

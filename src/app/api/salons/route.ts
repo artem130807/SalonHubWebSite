@@ -1,6 +1,6 @@
 import { UserRole } from "@/server/domain/types";
 import { getApp } from "@/server/infrastructure/get-app";
-import { requireRole } from "@/lib/session";
+import { getOptionalSession, requireRole } from "@/lib/session";
 import { fromResult, handleRouteError, jsonOk, readJson } from "@/lib/http";
 import type { SalonCatalogSort } from "@/server/application/salon-service";
 
@@ -11,10 +11,11 @@ function parseSort(value: string | null): SalonCatalogSort | undefined {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const session = await getOptionalSession();
     const salons = await getApp().salons.search({
       name: searchParams.get("search") ?? searchParams.get("q") ?? undefined,
       category: searchParams.get("category") ?? undefined,
-      city: searchParams.get("city") ?? undefined,
+      city: session?.city || undefined,
       sort: parseSort(searchParams.get("sort")),
     });
     return jsonOk(salons);

@@ -230,11 +230,10 @@ export const prismaSalons: ISalonRepository = {
     const rows = await prisma.salon.findMany({
       where: {
         isActive: true,
-        city: city ? { contains: city, mode: "insensitive" } : undefined,
+        city: city ? { equals: city, mode: "insensitive" } : undefined,
         OR: name
           ? [
               { name: { contains: name, mode: "insensitive" } },
-              { city: { contains: name, mode: "insensitive" } },
               { street: { contains: name, mode: "insensitive" } },
             ]
           : undefined,
@@ -293,10 +292,13 @@ export const prismaMasters: IMasterProfileRepository = {
     return rows.map(mapMaster);
   },
   listIds: async () => (await prisma.masterProfile.findMany({ select: { id: true } })).map((row) => row.id),
-  listTopRated: async (limit) => {
+  listTopRated: async (limit, city) => {
     const rows = await prisma.masterProfile.findMany({
+      where: city?.trim()
+        ? { salon: { city: { equals: city.trim(), mode: "insensitive" } } }
+        : undefined,
       include: { user: true },
-      orderBy: [{ rating: "desc" }, { ratingCount: "desc" }],
+      orderBy: [{ ratingCount: "desc" }, { rating: "desc" }],
       take: limit,
     });
     return rows.map(mapMaster);

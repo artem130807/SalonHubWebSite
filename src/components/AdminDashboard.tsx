@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { apiFetch } from "@/lib/client-api";
+import { CitySuggest } from "@/components/site/CitySuggest";
 import { CalendarCheck, Users, Scissors } from "lucide-react";
 
 type AppointmentView = {
@@ -137,7 +138,7 @@ function CreateSalonForm() {
       <form className="space-y-4" onSubmit={onSubmit}>
         {error && <p className="text-sm text-error">{error}</p>}
         <input name="name" required placeholder="Название" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
-        <input name="city" required placeholder="Город" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
+        <CitySuggest placeholder="Город салона" />
         <input name="street" required placeholder="Улица" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
         <input name="building" required placeholder="Дом" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />
         <input name="phone" placeholder="Телефон" className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3" />

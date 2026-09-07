@@ -43,6 +43,8 @@ describe("salon catalog search and sort", () => {
       isActive: true,
     });
     expect((await repos.salons.search({ city: "казань" })).map((s) => s.id)).toEqual(["s2"]);
+    expect((await repos.salons.search({ city: "каз" })).map((s) => s.id)).toEqual([]);
+    expect((await repos.salons.search({ city: "Москва", name: "beta" })).map((s) => s.id)).toEqual([]);
     expect((await repos.salons.search({ name: "alpha" })).map((s) => s.id)).toEqual(["s1"]);
     expect((await repos.salons.search({ category: "стрижка" })).map((s) => s.id)).toEqual(["s1"]);
   });
@@ -60,5 +62,9 @@ describe("salon catalog search and sort", () => {
     await app.repos.masters.updateRating(master.value.id, 4.8, 7);
     const featured = await app.masters.featured(4);
     expect(featured.ok && featured.value[0]?.id).toBe(master.value.id);
+    const otherCity = await app.masters.featured(4, "Казань");
+    expect(otherCity.ok && otherCity.value).toEqual([]);
+    const sameCity = await app.masters.featured(4, "Москва");
+    expect(sameCity.ok && sameCity.value[0]?.id).toBe(master.value.id);
   });
 });

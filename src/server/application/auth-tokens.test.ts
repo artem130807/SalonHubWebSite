@@ -41,7 +41,7 @@ async function verifiedClient(now = new Date("2026-09-03T08:00:00.000Z")) {
     clock,
   });
   const registered = await services.auth.register(
-    { name: "Иван", email: "ivan@test.com", phone: "+79991112233", password: "password1", role: UserRole.Client },
+    { name: "Иван", email: "ivan@test.com", phone: "+79991112233", password: "password1", city: "Москва", role: UserRole.Client },
     true,
   );
   if (!registered.ok) throw new Error("register failed");

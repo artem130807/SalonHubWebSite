@@ -8,6 +8,7 @@ import {
 import { generateRefreshToken, hashRefreshToken } from "@/server/application/refresh-token";
 import type {
   IClock,
+  ICityCatalog,
   IEmailVerificationRepository,
   IMasterProfileRepository,
   IPasswordHasher,
@@ -28,6 +29,7 @@ export type RegisterInput = {
   email: string;
   phone: string;
   password: string;
+  city: string;
   role?: UserRole;
 };
 
@@ -50,6 +52,7 @@ export class AuthService {
     private readonly tokens: ITokenService,
     private readonly codes: IVerificationCodeGenerator,
     private readonly clock: IClock,
+    private readonly cities: ICityCatalog,
   ) {}
 
   async register(input: RegisterInput, includeCode: boolean) {
@@ -63,6 +66,9 @@ export class AuthService {
     if (!EMAIL_RE.test(email)) return err("Некорректный email");
     if (!PHONE_RE.test(input.phone.trim())) return err("Номер не соответствует формату");
     if (!input.name.trim()) return err("Имя обязательно");
+    if (!input.city?.trim()) return err("Вы не указали город");
+    const city = this.cities.canonical(input.city);
+    if (!city) return err("Вы указали неверный город");
 
     if (await this.users.getByEmail(email)) {
       return err("Пользователь с таким email уже существует");
@@ -77,6 +83,7 @@ export class AuthService {
       passwordHash: await this.hasher.hash(input.password),
       role: input.role ?? UserRole.Client,
       emailVerified: false,
+      city,
       createdAt: now,
     };
     const code = this.codes.generate();
