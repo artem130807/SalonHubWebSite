@@ -6,11 +6,13 @@ import {
   SALON_CARD_PREVIEW_MINUTES,
 } from "@/server/domain/scheduling";
 import { TimeSlotStatus, UserRole, type Salon } from "@/server/domain/types";
+import { bestDiscountPercent, isPromotionLive } from "@/server/domain/promotion-rules";
 import type {
   IAppointmentRepository,
   ICityCatalog,
   IClock,
   IMasterTimeSlotRepository,
+  IPromotionRepository,
   ISalonAdminRepository,
   ISalonPhotoRepository,
   ISalonRepository,
@@ -38,6 +40,7 @@ export class SalonService {
     private readonly photos: ISalonPhotoRepository,
     private readonly services: IServiceRepository,
     private readonly cities: ICityCatalog,
+    private readonly promotions: IPromotionRepository,
   ) {}
 
   async search(query: SalonCatalogQuery = {}) {
@@ -47,6 +50,8 @@ export class SalonService {
       city: query.city,
     });
     const today = dateOnly(this.clock.utcNow());
+    const allPromos = await this.promotions.listBySalonIds(list.map((salon) => salon.id));
+    const livePromos = allPromos.filter((item) => isPromotionLive(item, this.clock.utcNow()));
     const cards = await Promise.all(
       list.map(async (salon) => {
         const [photos, services] = await Promise.all([
@@ -64,6 +69,7 @@ export class SalonService {
           ratingCount: salon.ratingCount,
           photoUrl: photos[0]?.url ?? null,
           minPrice: prices.length ? Math.min(...prices) : null,
+          bestDiscountPercent: bestDiscountPercent(livePromos.filter((item) => item.salonId === salon.id)),
           availableStartsToday: await this.countStarts(salon.id, today),
         };
       }),

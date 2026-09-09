@@ -9,11 +9,12 @@ import {
   LayoutDashboard,
   User,
   Bell,
-  MessageCircle,
   Star,
   Heart,
   Settings,
   Camera,
+  Images,
+  Percent,
   BarChart3,
   Users,
   ClipboardList,
@@ -38,20 +39,21 @@ export function DashboardLayout({ children, role, name }: DashboardLayoutProps) 
     { to: "/admin/services", icon: Scissors, label: "Услуги" },
     { to: "/admin/masters", icon: Users, label: "Мастера" },
     { to: "/admin/photos", icon: Camera, label: "Фото" },
+    { to: "/admin/promotions", icon: Percent, label: "Акции" },
     { to: "/admin/reviews", icon: Star, label: "Отзывы" },
     { to: "/admin/stats", icon: BarChart3, label: "Статистика" },
     { to: "/admin/inbox", icon: Bell, label: "Уведомления" },
-    { to: "/admin/chat", icon: MessageCircle, label: "Чат" },
   ];
 
   const barberLinks = [
     { to: "/barber", icon: Calendar, label: "Расписание" },
     { to: "/barber/walk-in", icon: ClipboardList, label: "Запись гостя" },
     { to: "/barber/templates", icon: Calendar, label: "Шаблоны" },
+    { to: "/barber/portfolio", icon: Images, label: "Портфолио" },
+    { to: "/barber/profile", icon: User, label: "Профиль" },
     { to: "/barber/stats", icon: BarChart3, label: "Статистика" },
     { to: "/barber/reviews", icon: Star, label: "Отзывы" },
     { to: "/barber/inbox", icon: Bell, label: "Уведомления" },
-    { to: "/barber/chat", icon: MessageCircle, label: "Чат" },
   ];
 
   const clientLinks = [
@@ -60,7 +62,6 @@ export function DashboardLayout({ children, role, name }: DashboardLayoutProps) 
     { to: "/account/reviews", icon: Star, label: "Отзывы" },
     { to: "/account/favorites", icon: Heart, label: "Избранное" },
     { to: "/account/inbox", icon: Bell, label: "Уведомления" },
-    { to: "/account/chat", icon: MessageCircle, label: "Чат" },
     { to: "/account/settings", icon: Settings, label: "Настройки" },
   ];
 

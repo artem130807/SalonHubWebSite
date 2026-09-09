@@ -20,6 +20,7 @@ export default async function BarberPage() {
       name={session.name}
       appointments={result.ok ? result.value : []}
       today={today}
+      publicProfileHref={session.masterProfileId ? `/masters/${session.masterProfileId}` : undefined}
     />
   );
 }

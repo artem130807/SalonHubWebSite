@@ -112,6 +112,7 @@ model Salon {
   services     Service[]
   appointments Appointment[]
   photos       SalonPhoto[]
+  promotions   SalonPromotion[]
   reviews      Review[]
   dailyStats   DailySalonStat[]
 }
@@ -132,6 +133,36 @@ model SalonPhoto {
   salon     Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
 }
 
+model SalonPromotion {
+  id               String    @id @default(uuid()) @db.Uuid
+  salonId          String    @db.Uuid
+  title            String
+  description      String?
+  discountPercent  Int
+  serviceId        String?   @db.Uuid
+  imageUrl         String?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  salon            Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  service          Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([salonId, isActive])
+}
+
+model PortfolioPhoto {
+  id        String        @id @default(uuid()) @db.Uuid
+  masterId  String        @db.Uuid
+  url       String
+  caption   String?
+  sortOrder Int           @default(0)
+  createdAt DateTime     @default(now())
+  master    MasterProfile @relation(fields: [masterId], references: [id], onDelete: Cascade)
+
+  @@index([masterId, createdAt])
+}
+
 model MasterProfile {
   id              String          @id @default(uuid()) @db.Uuid
   userId          String          @unique @db.Uuid
@@ -150,6 +181,7 @@ model MasterProfile {
   templates       WeeklyTemplate[]
   subscribers     MasterSubscription[]
   reviews         Review[]
+  portfolio       PortfolioPhoto[]
   dailyStats      DailyMasterStat[]
 }
 
@@ -165,6 +197,7 @@ model Service {
   salon           Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
   masterServices  MasterService[]
   appointments    Appointment[]
+  promotions      SalonPromotion[]
 }
 
 model MasterService {

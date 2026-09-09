@@ -10,7 +10,6 @@ import {
   Home,
   LogIn,
   LogOut,
-  MessageCircle,
   Scissors,
   Search,
   User,
@@ -140,7 +139,6 @@ export function ClientBottomNav({ viewer }: { viewer: SiteViewer }) {
         { href: "/", label: "Главная", icon: Home, match: "home" as const },
         { href: "/salons", label: "Поиск", icon: Search, match: "prefix" as const },
         { href: "/account", label: "Записи", icon: Calendar, match: "exact" as const },
-        { href: "/account/chat", label: "Чат", icon: MessageCircle, match: "prefix" as const },
         { href: "/account/favorites", label: "Избранное", icon: Heart, match: "prefix" as const },
         { href: "/account/settings", label: "Профиль", icon: User, match: "prefix" as const },
       ]
@@ -151,7 +149,7 @@ export function ClientBottomNav({ viewer }: { viewer: SiteViewer }) {
       ];
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-surface border-t border-outline">
-      <div className={`grid ${items.length > 3 ? "grid-cols-6" : "grid-cols-3"}`}>
+      <div className={`grid ${items.length > 3 ? "grid-cols-5" : "grid-cols-3"}`}>
         {items.map((item) => {
           const Icon = item.icon;
           const active =

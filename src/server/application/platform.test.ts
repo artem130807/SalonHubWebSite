@@ -317,7 +317,7 @@ describe("platform reviews, walk-in, chat, templates", () => {
     expect(forbidden.ok).toBe(false);
   });
 
-  it("preserves template day ids on update and rejects a sixth salon photo", async () => {
+  it("preserves template day ids on update and rejects unsafe salon photo URLs", async () => {
     const { services, adminReg, master, salon } = await seed();
     const template = await services.templates.create(master.value.userId, {
       name: "Будни",
@@ -332,12 +332,8 @@ describe("platform reviews, walk-in, chat, templates", () => {
       endTime: "15:00",
     });
     expect(updated.ok && updated.value.days[0]?.id).toBe(dayId);
-    for (let i = 0; i < 5; i += 1) {
-      const photo = await services.photos.add(adminReg.value.userId, salon.value.id, `/uploads/${i}.jpg`);
-      expect(photo.ok).toBe(true);
-    }
-    const sixth = await services.photos.add(adminReg.value.userId, salon.value.id, "/uploads/5.jpg");
-    expect(sixth.ok).toBe(false);
+    const first = await services.photos.add(adminReg.value.userId, salon.value.id, "/uploads/0.jpg");
+    expect(first.ok).toBe(true);
     const badUrl = await services.photos.add(adminReg.value.userId, salon.value.id, "javascript:alert(1)");
     expect(badUrl.ok).toBe(false);
     const traversal = await services.photos.add(adminReg.value.userId, salon.value.id, "/uploads/../.env");
@@ -356,6 +352,53 @@ describe("platform reviews, walk-in, chat, templates", () => {
     expect(okPass.ok).toBe(true);
     const login = await services.auth.login("client@test.com", "password2");
     expect(login.ok).toBe(true);
+  });
+
+  it("lets a salon admin publish a live promotion and hides expired ones from the public list", async () => {
+    const { services, adminReg, clientReg, salon, service } = await seed();
+    const live = await services.promotions.create(adminReg.value.userId, salon.value.id, {
+      title: "Стрижка недели",
+      description: "Скидка на мужскую стрижку",
+      discountPercent: 20,
+      serviceId: service.value.id,
+      startsOn: "2026-09-01",
+      endsOn: "2026-09-20",
+    });
+    expect(live.ok).toBe(true);
+    const expired = await services.promotions.create(adminReg.value.userId, salon.value.id, {
+      title: "Старая акция",
+      discountPercent: 40,
+      startsOn: "2026-08-01",
+      endsOn: "2026-08-31",
+    });
+    expect(expired.ok).toBe(true);
+    const publicList = await services.promotions.listPublic(salon.value.id);
+    expect(publicList.ok && publicList.value.map((item) => item.title)).toEqual(["Стрижка недели"]);
+    const stolen = await services.promotions.create(clientReg.value.userId, salon.value.id, {
+      title: "Чужая",
+      discountPercent: 15,
+    });
+    expect(stolen.ok).toBe(false);
+    const catalog = await services.salons.search({ city: "Москва" });
+    expect(catalog[0]?.bestDiscountPercent).toBe(20);
+  });
+
+  it("lets a master add portfolio photos and forbids another user from deleting them", async () => {
+    const { services, clientReg, master } = await seed();
+    const added = await services.portfolio.add(master.value.userId, {
+      url: "/uploads/cut-1.jpg",
+      caption: "Fade",
+    });
+    expect(added.ok).toBe(true);
+    if (!added.ok) return;
+    const listed = await services.portfolio.listByMaster(master.value.id);
+    expect(listed.ok && listed.value[0]?.caption).toBe("Fade");
+    const stolen = await services.portfolio.remove(clientReg.value.userId, added.value.id);
+    expect(stolen.ok).toBe(false);
+    const removed = await services.portfolio.remove(master.value.userId, added.value.id);
+    expect(removed.ok).toBe(true);
+    const badUrl = await services.portfolio.add(master.value.userId, { url: "javascript:alert(1)" });
+    expect(badUrl.ok).toBe(false);
   });
 
   it("forbids client statistics and refuses to unassign a missing master service", async () => {

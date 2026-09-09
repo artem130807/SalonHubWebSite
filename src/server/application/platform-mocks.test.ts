@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { CatalogService } from "@/server/application/master-catalog-service";
+import { PortfolioService, PromotionService } from "@/server/application/catalog-content-services";
 import {
   ChatService,
   ReviewService,
@@ -16,6 +17,8 @@ import type {
   IConversationRepository,
   IInboxRepository,
   IMasterProfileRepository,
+  IPortfolioRepository,
+  IPromotionRepository,
   IReviewRepository,
   ISalonAdminRepository,
   ISalonPhotoRepository,
@@ -138,6 +141,18 @@ describe("PhotoService with mocked ports", () => {
     expect(result.ok).toBe(false);
     expect(photos.add).not.toHaveBeenCalled();
   });
+
+  it("rejects a photo when the salon gallery is full", async () => {
+    const photos = {
+      listBySalon: vi.fn().mockResolvedValue(Array.from({ length: 20 }, (_, i) => ({ id: String(i) }))),
+      add: vi.fn(),
+    } as unknown as ISalonPhotoRepository;
+    const admins = { isAdminOfSalon: vi.fn().mockResolvedValue(true) } as unknown as ISalonAdminRepository;
+    const service = new PhotoService(photos, admins);
+    const result = await service.add("admin", "salon", "/uploads/full.jpg");
+    expect(result.ok).toBe(false);
+    expect(photos.add).not.toHaveBeenCalled();
+  });
 });
 
 describe("SubscriptionService with mocked ports", () => {
@@ -250,6 +265,33 @@ describe("CatalogService with mocked ports", () => {
     });
     expect(result.ok).toBe(false);
     expect(services.add).not.toHaveBeenCalled();
+  });
+});
+
+describe("PromotionService with mocked ports", () => {
+  it("rejects a promotion for a service from another salon", async () => {
+    const promotions = { listBySalon: vi.fn().mockResolvedValue([]), add: vi.fn() } as unknown as IPromotionRepository;
+    const admins = { isAdminOfSalon: vi.fn().mockResolvedValue(true) } as unknown as ISalonAdminRepository;
+    const services = { getById: vi.fn().mockResolvedValue({ id: "s2", salonId: "other" }) } as unknown as IServiceRepository;
+    const service = new PromotionService(promotions, admins, services, clock);
+    const result = await service.create("admin", "salon", {
+      title: "Скидка",
+      discountPercent: 15,
+      serviceId: "s2",
+    });
+    expect(result.ok).toBe(false);
+    expect(promotions.add).not.toHaveBeenCalled();
+  });
+});
+
+describe("PortfolioService with mocked ports", () => {
+  it("rejects a javascript URL", async () => {
+    const portfolio = { listByMaster: vi.fn(), add: vi.fn() } as unknown as IPortfolioRepository;
+    const masters = { getByUserId: vi.fn().mockResolvedValue({ id: "m1" }) } as unknown as IMasterProfileRepository;
+    const service = new PortfolioService(portfolio, masters);
+    const result = await service.add("master", { url: "javascript:alert(1)" });
+    expect(result.ok).toBe(false);
+    expect(portfolio.add).not.toHaveBeenCalled();
   });
 });
 

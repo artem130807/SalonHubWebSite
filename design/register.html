@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Регистрация — SalonHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  
+</head>
+<body>
+<main class="auth-page"><div class="card auth-card">
+    <a class="logo" href="home.html" style="justify-content:center;margin-bottom:1.4rem"><span class="logo-mark">✂</span>SALONHUB</a>
+    <h1 style="text-align:center;margin-bottom:1.4rem">Регистрация</h1>
+    <form>
+      <label><span>Имя</span><input class="field" /></label>
+      <label><span>Email</span><input class="field" type="email" /></label>
+      <label><span>Телефон</span><input class="field" placeholder="+79991112233" /></label>
+      <label><span>Город</span><input class="field" placeholder="Начните вводить город России" /></label>
+      <label><span>Пароль</span><input class="field" type="password" /></label>
+      <label><span>Роль</span><select class="field"><option>Клиент</option><option>Администратор салона</option></select></label>
+      <button class="btn btn-primary" type="button">Зарегистрироваться</button>
+      <p class="muted" style="text-align:center;margin-top:1rem">Уже есть аккаунт? <a class="gold" href="login.html">Войти</a></p>
+    </form>
+  </div></main>
+</body>
+</html>

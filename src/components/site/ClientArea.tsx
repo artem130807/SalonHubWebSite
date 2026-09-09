@@ -9,7 +9,6 @@ const links = [
   { href: "/account/favorites", label: "Избранное", match: "prefix" },
   { href: "/account/reviews", label: "Отзывы", match: "prefix" },
   { href: "/account/inbox", label: "Уведомления", match: "prefix" },
-  { href: "/account/chat", label: "Сообщения", match: "prefix" },
   { href: "/account/settings", label: "Профиль", match: "prefix" },
 ] as const;
 

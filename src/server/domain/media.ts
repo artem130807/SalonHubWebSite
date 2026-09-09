@@ -1,6 +1,10 @@
 const UPLOAD_PATH = /^\/uploads\/[A-Za-z0-9._-]+$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export const SALON_PHOTO_LIMITS = {
+  maxPhotos: 20,
+} as const;
+
 export function isUuid(value: string) {
   return UUID_RE.test(value);
 }

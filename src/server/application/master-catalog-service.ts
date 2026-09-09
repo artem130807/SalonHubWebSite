@@ -33,6 +33,26 @@ export class MasterManagementService {
     return ok(master);
   }
 
+  async getOwn(masterUserId: string) {
+    const master = await this.masters.getByUserId(masterUserId);
+    if (!master) return err("Профиль мастера не найден");
+    return ok(master);
+  }
+
+  async updateOwnAvatar(masterUserId: string, url: string | null) {
+    const master = await this.masters.getByUserId(masterUserId);
+    if (!master) return err("Профиль мастера не найден");
+    let avatarUrl: string | null = null;
+    if (url != null && url.trim() !== "") {
+      const trimmed = url.trim();
+      if (!isAllowedPhotoUrl(trimmed)) return err("Некорректный адрес фото");
+      avatarUrl = trimmed;
+    }
+    const next = { ...master, avatarUrl };
+    await this.masters.update(next);
+    return ok(next);
+  }
+
   async getMasterServices(masterId: string) {
     const master = await this.masters.getById(masterId);
     if (!master) return err("Мастер не найден");

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { PhotoCarousel } from "@/components/site/PhotoCarousel";
 import { apiFetch } from "@/lib/client-api";
 
 type Photo = { id: string; url: string };
@@ -52,7 +53,9 @@ export function AdminPhotos({ name, salonId }: { name: string; salonId: string }
     <DashboardLayout role="admin" name={name}>
       <div className="max-w-3xl space-y-6">
         <h1 className="text-3xl font-serif font-bold">Фото салона</h1>
+        <p className="text-onSurfaceVariant">Эти снимки видят клиенты на странице салона. Можно листать каруселью.</p>
         {error && <p className="text-error text-sm">{error}</p>}
+        <PhotoCarousel photos={items} alt="Фото салона" className="h-72" showThumbs emptyLabel="Пока нет фото салона" />
         <form onSubmit={upload} className="flex gap-3">
           <input name="file" type="file" accept="image/*" required />
           <button className="bg-primary text-onPrimary rounded-xl px-4 py-2">Загрузить</button>

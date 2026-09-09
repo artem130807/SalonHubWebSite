@@ -50,7 +50,6 @@ export function SettingsPanel({ name, city }: { name: string; city: string | nul
       <div className="flex flex-wrap gap-2.5 md:hidden">
         <Link href="/account/reviews" className="px-4 py-2 rounded-full text-sm font-medium bg-surface border border-outline text-onSurface hover:border-primary hover:text-primary transition-colors">Отзывы</Link>
         <Link href="/account/inbox" className="px-4 py-2 rounded-full text-sm font-medium bg-surface border border-outline text-onSurface hover:border-primary hover:text-primary transition-colors">Уведомления</Link>
-        <Link href="/account/chat" className="px-4 py-2 rounded-full text-sm font-medium bg-surface border border-outline text-onSurface hover:border-primary hover:text-primary transition-colors">Сообщения</Link>
       </div>
 
       {error && <p className="text-sm font-medium text-error bg-error/10 px-4 py-3 rounded-xl">{error}</p>}

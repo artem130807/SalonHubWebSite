@@ -125,7 +125,7 @@ export function HomeDiscover({
               {masters.map((master) => (
                 <Link
                   key={master.id}
-                  href={`/salons/${master.salonId}`}
+                  href={`/masters/${master.id}`}
                   className="group shrink-0 w-64 bg-surface border border-outline rounded-3xl p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg flex flex-col items-center text-center snap-start"
                 >
                   <div className="w-24 h-24 rounded-full bg-primary/10 mb-4 overflow-hidden border-2 border-transparent group-hover:border-primary/30 transition-colors">

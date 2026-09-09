@@ -14,6 +14,8 @@ import type {
   Review,
   Salon,
   SalonPhoto,
+  SalonPromotion,
+  PortfolioPhoto,
   Service,
   StatsJobRun,
   User,
@@ -33,6 +35,8 @@ import type {
   IReviewRepository,
   ISalonAdminRepository,
   ISalonPhotoRepository,
+  IPromotionRepository,
+  IPortfolioRepository,
   ISalonRepository,
   IServiceRepository,
   IStatsJobRunRepository,
@@ -66,6 +70,8 @@ export class InMemoryStore {
   conversations: Conversation[] = [];
   chatMessages: ChatMessage[] = [];
   photos: SalonPhoto[] = [];
+  promotions: SalonPromotion[] = [];
+  portfolio: PortfolioPhoto[] = [];
   dailySalonStats: DailySalonStat[] = [];
   dailyMasterStats: DailyMasterStat[] = [];
   statsJobRuns: StatsJobRun[] = [];
@@ -442,7 +448,8 @@ export class InMemoryReviewRepository implements IReviewRepository {
   private hydrate(review: Review): Review {
     const salon = this.db.salons.find((s) => s.id === review.salonId);
     const master = this.db.masters.find((m) => m.id === review.masterId);
-    return { ...review, salonName: salon?.name, masterName: master?.userName };
+    const client = this.db.users.find((u) => u.id === review.clientId);
+    return { ...review, salonName: salon?.name, masterName: master?.userName, clientName: client?.name };
   }
   async add(review: Review) {
     this.db.reviews.push(review);
@@ -623,6 +630,56 @@ export class InMemorySalonPhotoRepository implements ISalonPhotoRepository {
   }
 }
 
+export class InMemoryPromotionRepository implements IPromotionRepository {
+  constructor(private readonly db: InMemoryStore) {}
+  async add(promotion: SalonPromotion) {
+    this.db.promotions.push(promotion);
+  }
+  async update(promotion: SalonPromotion) {
+    const index = this.db.promotions.findIndex((item) => item.id === promotion.id);
+    if (index >= 0) this.db.promotions[index] = promotion;
+  }
+  async delete(id: string) {
+    this.db.promotions = this.db.promotions.filter((item) => item.id !== id);
+  }
+  async getById(id: string) {
+    return this.db.promotions.find((item) => item.id === id) ?? null;
+  }
+  async listBySalon(salonId: string) {
+    return this.db.promotions
+      .filter((item) => item.salonId === salonId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  async listBySalonIds(salonIds: string[]) {
+    const set = new Set(salonIds);
+    return this.db.promotions.filter((item) => set.has(item.salonId));
+  }
+}
+
+export class InMemoryPortfolioRepository implements IPortfolioRepository {
+  constructor(private readonly db: InMemoryStore) {}
+  async add(photo: PortfolioPhoto) {
+    this.db.portfolio.push(photo);
+  }
+  async delete(id: string) {
+    this.db.portfolio = this.db.portfolio.filter((item) => item.id !== id);
+  }
+  async getById(id: string) {
+    return this.db.portfolio.find((item) => item.id === id) ?? null;
+  }
+  async listByMaster(masterId: string) {
+    return this.db.portfolio
+      .filter((item) => item.masterId === masterId)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.getTime() - b.createdAt.getTime());
+  }
+  async listByMasterIds(masterIds: string[]) {
+    const set = new Set(masterIds);
+    return this.db.portfolio
+      .filter((item) => set.has(item.masterId))
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.getTime() - b.createdAt.getTime());
+  }
+}
+
 export class InMemoryDailyStatsRepository implements IDailyStatsRepository {
   constructor(private readonly db: InMemoryStore) {}
 
@@ -736,6 +793,8 @@ export function createInMemoryRepos(db = new InMemoryStore()) {
     conversations: new InMemoryConversationRepository(db),
     chatMessages: new InMemoryChatMessageRepository(db),
     photos: new InMemorySalonPhotoRepository(db),
+    promotions: new InMemoryPromotionRepository(db),
+    portfolio: new InMemoryPortfolioRepository(db),
     dailyStats: new InMemoryDailyStatsRepository(db),
     statsJobRuns: new InMemoryStatsJobRunRepository(db),
   };

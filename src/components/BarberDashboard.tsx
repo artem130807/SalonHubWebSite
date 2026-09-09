@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { apiFetch } from "@/lib/client-api";
 import { CheckCircle2, Clock, User, Scissors, Users } from "lucide-react";
@@ -20,10 +21,12 @@ export function BarberDashboard({
   name,
   appointments,
   today,
+  publicProfileHref,
 }: {
   name: string;
   appointments: AppointmentView[];
   today: string;
+  publicProfileHref?: string;
 }) {
   const router = useRouter();
   const confirmed = appointments.filter((a) => a.status === "Confirmed");
@@ -47,6 +50,11 @@ export function BarberDashboard({
         <div>
           <h1 className="text-3xl font-bold font-serif mb-2">Привет, {name}!</h1>
           <p className="text-onSurfaceVariant">Расписание на сегодня</p>
+          {publicProfileHref && (
+            <Link href={publicProfileHref} className="inline-block mt-2 text-sm font-semibold text-primary hover:underline">
+              Как видят клиенты
+            </Link>
+          )}
         </div>
         {error && <p className="text-sm text-error">{error}</p>}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

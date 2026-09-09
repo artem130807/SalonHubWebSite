@@ -14,6 +14,8 @@ import type {
   Review,
   Salon,
   SalonPhoto,
+  SalonPromotion,
+  PortfolioPhoto,
   Service,
   StatsJobRun,
   TimeSlotStatus,
@@ -232,6 +234,23 @@ export interface ISalonPhotoRepository {
   delete(id: string): Promise<void>;
   getById(id: string): Promise<SalonPhoto | null>;
   listBySalon(salonId: string): Promise<SalonPhoto[]>;
+}
+
+export interface IPromotionRepository {
+  add(promotion: SalonPromotion): Promise<void>;
+  update(promotion: SalonPromotion): Promise<void>;
+  delete(id: string): Promise<void>;
+  getById(id: string): Promise<SalonPromotion | null>;
+  listBySalon(salonId: string): Promise<SalonPromotion[]>;
+  listBySalonIds(salonIds: string[]): Promise<SalonPromotion[]>;
+}
+
+export interface IPortfolioRepository {
+  add(photo: PortfolioPhoto): Promise<void>;
+  delete(id: string): Promise<void>;
+  getById(id: string): Promise<PortfolioPhoto | null>;
+  listByMaster(masterId: string): Promise<PortfolioPhoto[]>;
+  listByMasterIds(masterIds: string[]): Promise<PortfolioPhoto[]>;
 }
 
 export interface IDailyStatsRepository {

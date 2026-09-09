@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Страница салона — SalonHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  
+</head>
+<body>
+<header class="header">
+  <div class="wrap header-inner">
+    <a class="logo" href="home.html"><span class="logo-mark">✂</span>SALON<span class="gold">HUB</span></a>
+    <form class="search" action="salons.html"><input placeholder="Поиск салона, услуги или мастера..." /></form>
+    <nav class="nav">
+      <a href="salons.html" class="active">Салоны</a>
+      <a href="account.html" class="">Записи</a>
+      <a href="account-favorites.html" class="">Избранное</a>
+      <a href="login.html" class="btn btn-primary" style="padding:.65rem 1.3rem">Войти</a>
+    </nav>
+  </div>
+</header><main class="wrap section" style="max-width:56rem">
+    <a class="muted" href="salons.html">← Все салоны</a>
+    <div class="card" style="padding:2rem;margin-top:1rem">
+      <div style="display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
+        <div>
+          <h1>Парикмахерская Локон</h1>
+          <p class="muted" style="margin-top:1rem">Москва, Тверская, 1</p>
+          <p class="muted">+79990001122</p>
+        </div>
+        <div style="display:flex;gap:1rem;align-items:center">
+          <span class="rating">★ 4.8 (24 оценок)</span>
+          <a class="btn btn-primary" style="padding:.8rem 1.4rem" href="#">Записаться</a>
+        </div>
+      </div>
+    </div>
+    <p class="muted" style="margin:1.5rem 0">Барбершоп в центре</p>
+    <h2>Мастера</h2>
+    <div class="list" style="margin:1rem 0 2rem">
+      <div class="row"><div><strong>Александр</strong><p class="muted">Стрижки</p></div><a class="btn btn-primary" style="padding:.6rem 1rem" href="#">Записаться</a></div>
+    </div>
+    <h2>Услуги</h2>
+    <div class="list" style="margin:1rem 0 2rem">
+      <div class="row"><div><strong>Мужская стрижка</strong><p class="muted">40 мин</p></div><strong class="gold">1500 ₽</strong></div>
+      <div class="row"><div><strong>Бритьё</strong><p class="muted">20 мин</p></div><strong class="gold">800 ₽</strong></div>
+    </div>
+    <h2>Отзывы</h2>
+    <div class="row" style="margin-top:1rem"><p>Отличная стрижка, приду ещё.</p></div>
+  </main><footer class="footer"><div class="wrap muted">© 2026 SALONHUB · Платформа онлайн-записи в салоны</div></footer>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { err, ok } from "@/server/domain/result";
 import { applyRating, isValidStarRating, removeRating } from "@/server/domain/rating";
-import { isAllowedPhotoUrl, isUuid } from "@/server/domain/media";
+import { isAllowedPhotoUrl, isUuid, SALON_PHOTO_LIMITS } from "@/server/domain/media";
 import { addDailyTotals, EMPTY_DAILY_TOTALS, tallyAppointments } from "@/server/domain/stats";
 import { eachDateOnly, isoDateOnly, utcRangeForDateOnly } from "@/server/domain/calendar";
 import { dateOnly, isValidClockTime, isValidDateOnly, normalizeClockTime, toMinutes } from "@/server/domain/scheduling";
@@ -617,7 +617,9 @@ export class PhotoService {
       return err("Некорректный адрес фото");
     }
     const existing = await this.photos.listBySalon(salonId);
-    if (existing.length >= 5) return err("Можно загрузить не больше 5 фото салона");
+    if (existing.length >= SALON_PHOTO_LIMITS.maxPhotos) {
+      return err(`Можно загрузить не больше ${SALON_PHOTO_LIMITS.maxPhotos} фото салона`);
+    }
     const photo = { id: randomUUID(), salonId, url: trimmed };
     await this.photos.add(photo);
     return ok(photo);

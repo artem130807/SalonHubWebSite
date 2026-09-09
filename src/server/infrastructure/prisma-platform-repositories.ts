@@ -5,12 +5,15 @@ import type {
   MasterSubscription,
   Review,
   SalonPhoto,
+  SalonPromotion,
   WeeklyTemplate,
 } from "@/server/domain/types";
 import type {
   IChatMessageRepository,
   IConversationRepository,
   IInboxRepository,
+  IPortfolioRepository,
+  IPromotionRepository,
   IReviewRepository,
   ISalonPhotoRepository,
   ISubscriptionRepository,
@@ -34,6 +37,7 @@ function mapReview(row: {
   createdAt: Date;
   salon?: { name: string };
   master?: { user: { name: string } };
+  client?: { name: string };
 }): Review {
   return {
     id: row.id,
@@ -47,6 +51,7 @@ function mapReview(row: {
     createdAt: row.createdAt,
     salonName: row.salon?.name,
     masterName: row.master?.user.name,
+    clientName: row.client?.name,
   };
 }
 
@@ -164,21 +169,21 @@ export const prismaReviews: IReviewRepository = {
   getById: async (id) => {
     const row = await prisma.review.findUnique({
       where: { id },
-      include: { salon: true, master: { include: { user: true } } },
+      include: { salon: true, master: { include: { user: true } }, client: true },
     });
     return row ? mapReview(row) : null;
   },
   getByAppointmentId: async (appointmentId) => {
     const row = await prisma.review.findUnique({
       where: { appointmentId },
-      include: { salon: true, master: { include: { user: true } } },
+      include: { salon: true, master: { include: { user: true } }, client: true },
     });
     return row ? mapReview(row) : null;
   },
   listByClient: async (clientId) => {
     const rows = await prisma.review.findMany({
       where: { clientId },
-      include: { salon: true, master: { include: { user: true } } },
+      include: { salon: true, master: { include: { user: true } }, client: true },
       orderBy: { createdAt: "desc" },
     });
     return rows.map(mapReview);
@@ -186,7 +191,7 @@ export const prismaReviews: IReviewRepository = {
   listBySalon: async (salonId) => {
     const rows = await prisma.review.findMany({
       where: { salonId },
-      include: { salon: true, master: { include: { user: true } } },
+      include: { salon: true, master: { include: { user: true } }, client: true },
       orderBy: { createdAt: "desc" },
     });
     return rows.map(mapReview);
@@ -194,7 +199,7 @@ export const prismaReviews: IReviewRepository = {
   listByMaster: async (masterId) => {
     const rows = await prisma.review.findMany({
       where: { masterId },
-      include: { salon: true, master: { include: { user: true } } },
+      include: { salon: true, master: { include: { user: true } }, client: true },
       orderBy: { createdAt: "desc" },
     });
     return rows.map(mapReview);
@@ -205,7 +210,7 @@ export const prismaReviews: IReviewRepository = {
         salonId: salonId || undefined,
         OR: [{ salonRating: { lte: 3 } }, { masterRating: { lte: 3 } }],
       },
-      include: { salon: true, master: { include: { user: true } } },
+      include: { salon: true, master: { include: { user: true } }, client: true },
       orderBy: { createdAt: "desc" },
     });
     return rows.map(mapReview);
@@ -428,5 +433,124 @@ export const prismaPhotos: ISalonPhotoRepository = {
   },
   getById: async (id) => prisma.salonPhoto.findUnique({ where: { id } }),
   listBySalon: async (salonId) =>
-    prisma.salonPhoto.findMany({ where: { salonId }, orderBy: { createdAt: "desc" } }),
+    prisma.salonPhoto.findMany({ where: { salonId }, orderBy: { createdAt: "asc" } }),
+};
+
+function mapPromotion(row: {
+  id: string;
+  salonId: string;
+  title: string;
+  description: string | null;
+  discountPercent: number;
+  serviceId: string | null;
+  imageUrl: string | null;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  isActive: boolean;
+  createdAt: Date;
+  service?: { name: string } | null;
+}): SalonPromotion {
+  return {
+    id: row.id,
+    salonId: row.salonId,
+    title: row.title,
+    description: row.description,
+    discountPercent: row.discountPercent,
+    serviceId: row.serviceId,
+    serviceName: row.service?.name ?? null,
+    imageUrl: row.imageUrl,
+    startsAt: row.startsAt,
+    endsAt: row.endsAt,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+  };
+}
+
+export const prismaPromotions: IPromotionRepository = {
+  add: async (promotion) => {
+    await prisma.salonPromotion.create({
+      data: {
+        id: promotion.id,
+        salonId: promotion.salonId,
+        title: promotion.title,
+        description: promotion.description,
+        discountPercent: promotion.discountPercent,
+        serviceId: promotion.serviceId,
+        imageUrl: promotion.imageUrl,
+        startsAt: promotion.startsAt,
+        endsAt: promotion.endsAt,
+        isActive: promotion.isActive,
+        createdAt: promotion.createdAt,
+      },
+    });
+  },
+  update: async (promotion) => {
+    await prisma.salonPromotion.update({
+      where: { id: promotion.id },
+      data: {
+        title: promotion.title,
+        description: promotion.description,
+        discountPercent: promotion.discountPercent,
+        serviceId: promotion.serviceId,
+        imageUrl: promotion.imageUrl,
+        startsAt: promotion.startsAt,
+        endsAt: promotion.endsAt,
+        isActive: promotion.isActive,
+      },
+    });
+  },
+  delete: async (id) => {
+    await prisma.salonPromotion.delete({ where: { id } });
+  },
+  getById: async (id) => {
+    const row = await prisma.salonPromotion.findUnique({ where: { id }, include: { service: true } });
+    return row ? mapPromotion(row) : null;
+  },
+  listBySalon: async (salonId) => {
+    const rows = await prisma.salonPromotion.findMany({
+      where: { salonId },
+      include: { service: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return rows.map(mapPromotion);
+  },
+  listBySalonIds: async (salonIds) => {
+    if (salonIds.length === 0) return [];
+    const rows = await prisma.salonPromotion.findMany({
+      where: { salonId: { in: salonIds } },
+      include: { service: true },
+    });
+    return rows.map(mapPromotion);
+  },
+};
+
+export const prismaPortfolio: IPortfolioRepository = {
+  add: async (photo) => {
+    await prisma.portfolioPhoto.create({
+      data: {
+        id: photo.id,
+        masterId: photo.masterId,
+        url: photo.url,
+        caption: photo.caption,
+        sortOrder: photo.sortOrder,
+        createdAt: photo.createdAt,
+      },
+    });
+  },
+  delete: async (id) => {
+    await prisma.portfolioPhoto.delete({ where: { id } });
+  },
+  getById: async (id) => prisma.portfolioPhoto.findUnique({ where: { id } }),
+  listByMaster: async (masterId) =>
+    prisma.portfolioPhoto.findMany({
+      where: { masterId },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
+  listByMasterIds: async (masterIds) => {
+    if (masterIds.length === 0) return [];
+    return prisma.portfolioPhoto.findMany({
+      where: { masterId: { in: masterIds } },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+  },
 };

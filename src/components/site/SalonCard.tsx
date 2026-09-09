@@ -16,6 +16,7 @@ export type SalonCardModel = {
   ratingCount: number;
   photoUrl?: string | null;
   minPrice?: number | null;
+  bestDiscountPercent?: number;
   availableStartsToday: number;
 };
 
@@ -31,10 +32,15 @@ export function SalonCard({ salon }: { salon: SalonCardModel }) {
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end gap-3">
           <h3 className="text-xl font-bold text-onBackground leading-tight drop-shadow-md">{salon.name}</h3>
-          <div className="flex items-center gap-1.5 bg-surface/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-sm">
+          <div className="flex items-center gap-2">
+            {(salon.bestDiscountPercent ?? 0) > 0 && (
+              <span className="bg-primary text-onPrimary text-xs font-bold px-2.5 py-1 rounded-lg">−{salon.bestDiscountPercent}%</span>
+            )}
+            <div className="flex items-center gap-1.5 bg-surface/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-sm">
             <Star className="w-4 h-4 text-primary fill-primary" />
             <span className="text-sm font-bold">{salon.rating.toFixed(1)}</span>
             <span className="text-xs text-onSurfaceVariant font-medium">({salon.ratingCount})</span>
+            </div>
           </div>
         </div>
       </Link>

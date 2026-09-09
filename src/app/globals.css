@@ -46,7 +46,10 @@ dialog:not([open]) {
   background: #d4af37;
 }
 
-::selection {
-  background-color: #d4af37;
-  color: #1a1a1a;
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }

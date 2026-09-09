@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Главная — SalonHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  
+</head>
+<body>
+<header class="header">
+  <div class="wrap header-inner">
+    <a class="logo" href="home.html"><span class="logo-mark">✂</span>SALON<span class="gold">HUB</span></a>
+    <form class="search" action="salons.html"><input placeholder="Поиск салона, услуги или мастера..." /></form>
+    <nav class="nav">
+      <a href="salons.html" class="">Салоны</a>
+      <a href="account.html" class="">Записи</a>
+      <a href="account-favorites.html" class="">Избранное</a>
+      <a href="login.html" class="btn btn-primary" style="padding:.65rem 1.3rem">Войти</a>
+    </nav>
+  </div>
+</header><main>
+    <section class="hero"><div class="wrap">
+      <p style="font-size:1.6rem;font-family:var(--font-serif);font-weight:700">Привет!</p>
+      <p class="muted">Найди свой идеальный стиль</p>
+      <h1>Лучшие салоны.<br /><em class="gold">В одном месте.</em></h1>
+      <form class="search-hero" action="salons.html">
+        <input name="q" placeholder="Поиск салона, услуги или мастера..." />
+        <button class="btn btn-primary" type="submit">Найти</button>
+      </form>
+    </div></section>
+    <section class="section"><div class="wrap">
+      <h2>Категории услуг</h2>
+      <div class="cats" style="margin-top:1.2rem">
+        <a class="cat" href="salons.html"><div class="cat-icon">✂</div>Стрижка</a><a class="cat" href="salons.html"><div class="cat-icon">✂</div>Бритьё</a><a class="cat" href="salons.html"><div class="cat-icon">✂</div>Усы/борода</a><a class="cat" href="salons.html"><div class="cat-icon">✂</div>Массаж</a><a class="cat" href="salons.html"><div class="cat-icon">✂</div>Детская</a><a class="cat" href="salons.html"><div class="cat-icon">✂</div>Премиум</a>
+      </div>
+    </div></section>
+    <section class="section"><div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:1.5rem">
+        <div><h2>Салоны</h2><p class="muted" style="margin-top:.5rem">Выберите салон, мастера и удобное время</p></div>
+        <a class="gold" href="salons.html">Ещё</a>
+      </div>
+      <div class="grid-3"><article class="card salon-card">
+    <a class="salon-photo" href="salon.html">
+      <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=800&h=500" alt="Парикмахерская Локон" />
+      <div class="meta">
+        <h3>Парикмахерская Локон</h3>
+        <span class="rating">★ 4.8 (24)</span>
+      </div>
+    </a>
+    <div class="salon-body">
+      <p class="muted">Москва, Тверская, 1</p>
+      <p>от <strong>800 ₽</strong></p>
+      <p class="muted">Свободных стартов сегодня: 6</p>
+      <div class="actions">
+        <a class="btn btn-ghost" href="salon.html">Подробнее</a>
+        <a class="btn btn-primary" href="salon.html">Записаться</a>
+      </div>
+    </div>
+  </article><article class="card salon-card">
+    <a class="salon-photo" href="salon.html">
+      <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=800&h=500" alt="Парикмахерская Локон" />
+      <div class="meta">
+        <h3>Парикмахерская Локон</h3>
+        <span class="rating">★ 4.8 (24)</span>
+      </div>
+    </a>
+    <div class="salon-body">
+      <p class="muted">Москва, Тверская, 1</p>
+      <p>от <strong>800 ₽</strong></p>
+      <p class="muted">Свободных стартов сегодня: 6</p>
+      <div class="actions">
+        <a class="btn btn-ghost" href="salon.html">Подробнее</a>
+        <a class="btn btn-primary" href="salon.html">Записаться</a>
+      </div>
+    </div>
+  </article><article class="card salon-card">
+    <a class="salon-photo" href="salon.html">
+      <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=800&h=500" alt="Парикмахерская Локон" />
+      <div class="meta">
+        <h3>Парикмахерская Локон</h3>
+        <span class="rating">★ 4.8 (24)</span>
+      </div>
+    </a>
+    <div class="salon-body">
+      <p class="muted">Москва, Тверская, 1</p>
+      <p>от <strong>800 ₽</strong></p>
+      <p class="muted">Свободных стартов сегодня: 6</p>
+      <div class="actions">
+        <a class="btn btn-ghost" href="salon.html">Подробнее</a>
+        <a class="btn btn-primary" href="salon.html">Записаться</a>
+      </div>
+    </div>
+  </article></div>
+    </div></section>
+    <section class="section"><div class="wrap">
+      <h2>Лучшие мастера</h2>
+      <div class="masters" style="margin-top:1.5rem">
+        <a class="card master" href="salon.html"><div class="avatar">А</div><p><strong>Александр</strong></p><p class="muted">Стрижки</p></a>
+        <a class="card master" href="salon.html"><div class="avatar">М</div><p><strong>Мария</strong></p><p class="muted">Колорист</p></a>
+      </div>
+    </div></section>
+  </main><footer class="footer"><div class="wrap muted">© 2026 SALONHUB · Платформа онлайн-записи в салоны</div></footer>
+</body>
+</html>

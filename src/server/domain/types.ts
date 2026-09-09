@@ -180,6 +180,7 @@ export type Review = {
   createdAt: Date;
   salonName?: string;
   masterName?: string;
+  clientName?: string;
 };
 
 export type WeeklyTemplate = {
@@ -212,6 +213,30 @@ export type SalonPhoto = {
   id: string;
   salonId: string;
   url: string;
+};
+
+export type SalonPromotion = {
+  id: string;
+  salonId: string;
+  title: string;
+  description: string | null;
+  discountPercent: number;
+  serviceId: string | null;
+  serviceName?: string | null;
+  imageUrl: string | null;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  isActive: boolean;
+  createdAt: Date;
+};
+
+export type PortfolioPhoto = {
+  id: string;
+  masterId: string;
+  url: string;
+  caption: string | null;
+  sortOrder: number;
+  createdAt: Date;
 };
 
 export type MasterSubscription = {

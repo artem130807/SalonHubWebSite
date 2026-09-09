@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, TimeSlotStatus } from "@prisma/client";
+import { PrismaClient, UserRole, TimeSlotStatus, AppointmentStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -141,6 +141,99 @@ async function main() {
         status: TimeSlotStatus.Available,
       })),
     });
+  }
+
+  await prisma.salonPromotion.upsert({
+    where: { id: "44444444-4444-4444-4444-444444444444" },
+    update: {},
+    create: {
+      id: "44444444-4444-4444-4444-444444444444",
+      salonId: salon.id,
+      title: "Стрижка недели",
+      description: "Скидка на мужскую стрижку в будни. Успейте записаться, пока действует акция.",
+      discountPercent: 20,
+      serviceId: haircut.id,
+      isActive: true,
+    },
+  });
+
+  const portfolioUrls = [
+    "https://images.unsplash.com/photo-1503951914875-452162b0f3ea?auto=format&fit=crop&q=80&w=900&h=700",
+    "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=900&h=700",
+    "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&q=80&w=900&h=700",
+  ];
+  const existingPortfolio = await prisma.portfolioPhoto.count({ where: { masterId: master.id } });
+  if (existingPortfolio === 0) {
+    await prisma.portfolioPhoto.createMany({
+      data: portfolioUrls.map((url, index) => ({
+        masterId: master.id,
+        url,
+        caption: index === 0 ? "Классический fade" : index === 1 ? "Короткая стрижка" : "Текстура и укладка",
+        sortOrder: index,
+      })),
+    });
+  }
+
+  const salonPhotoUrls = [
+    "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80&w=1400",
+    "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=1400",
+    "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&q=80&w=1400",
+  ];
+  await prisma.salonPhoto.deleteMany({ where: { salonId: salon.id } });
+  await prisma.salonPhoto.createMany({
+    data: salonPhotoUrls.map((url) => ({ salonId: salon.id, url })),
+  });
+
+  const client = await prisma.user.findUnique({ where: { email: "client@test.com" } });
+  const demoSlotId = "66666666-6666-6666-6666-666666666666";
+  const demoAppointmentId = "55555555-5555-5555-5555-555555555555";
+  if (client) {
+    const existingReview = await prisma.review.findUnique({ where: { appointmentId: demoAppointmentId } });
+    if (!existingReview) {
+      await prisma.masterTimeSlot.upsert({
+        where: { id: demoSlotId },
+        update: {},
+        create: {
+          id: demoSlotId,
+          masterId: master.id,
+          scheduleDate: new Date("2026-08-15T00:00:00.000Z"),
+          startTime: "11:00",
+          endTime: "18:00",
+          status: TimeSlotStatus.Booked,
+        },
+      });
+      await prisma.appointment.create({
+        data: {
+          id: demoAppointmentId,
+          salonId: salon.id,
+          clientId: client.id,
+          masterId: master.id,
+          serviceId: haircut.id,
+          timeSlotId: demoSlotId,
+          startTime: "11:00",
+          endTime: "11:40",
+          appointmentDate: new Date("2026-08-15T00:00:00.000Z"),
+          status: AppointmentStatus.Completed,
+        },
+      });
+      await prisma.review.create({
+        data: {
+          appointmentId: demoAppointmentId,
+          clientId: client.id,
+          salonId: salon.id,
+          masterId: master.id,
+          salonRating: 5,
+          masterRating: 5,
+          comment: "Отличная стрижка, приду ещё.",
+        },
+      });
+      if (master.ratingCount === 0) {
+        await prisma.masterProfile.update({ where: { id: master.id }, data: { rating: 5, ratingCount: 1 } });
+      }
+      if (salon.ratingCount === 0) {
+        await prisma.salon.update({ where: { id: salon.id }, data: { rating: 5, ratingCount: 1 } });
+      }
+    }
   }
 }
 

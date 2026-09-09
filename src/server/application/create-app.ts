@@ -16,6 +16,8 @@ import type {
   IReviewRepository,
   ISalonAdminRepository,
   ISalonPhotoRepository,
+  IPromotionRepository,
+  IPortfolioRepository,
   ISalonRepository,
   IServiceRepository,
   IStatsJobRunRepository,
@@ -41,6 +43,8 @@ import {
   SubscriptionService,
   TemplateService,
 } from "@/server/application/platform-services";
+import { PortfolioService, PromotionService } from "@/server/application/catalog-content-services";
+import { PublicMasterProfileService } from "@/server/application/master-profile-query";
 import { DailyStatsJobService } from "@/server/application/daily-stats-job";
 
 const silentNotifier: INotifier = {
@@ -66,6 +70,8 @@ export type AppDeps = {
   conversations: IConversationRepository;
   chatMessages: IChatMessageRepository;
   photos: ISalonPhotoRepository;
+  promotions: IPromotionRepository;
+  portfolio: IPortfolioRepository;
   dailyStats: IDailyStatsRepository;
   statsJobRuns: IStatsJobRunRepository;
   hasher: IPasswordHasher;
@@ -103,6 +109,7 @@ export function createApp(deps: AppDeps) {
     deps.photos,
     deps.services,
     cities,
+    deps.promotions,
   );
   const masters = new MasterManagementService(
     deps.masters,
@@ -147,12 +154,24 @@ export function createApp(deps: AppDeps) {
     deps.clock,
   );
   const photos = new PhotoService(deps.photos, deps.salonAdmins);
+  const promotions = new PromotionService(deps.promotions, deps.salonAdmins, deps.services, deps.clock);
+  const portfolio = new PortfolioService(deps.portfolio, deps.masters);
   const profile = new ProfileService(deps.users, deps.hasher, cities);
+  const publicMasters = new PublicMasterProfileService(
+    deps.masters,
+    deps.salons,
+    deps.masterServices,
+    deps.portfolio,
+    deps.reviews,
+    deps.promotions,
+    deps.clock,
+  );
 
   return {
     auth,
     salons,
     masters,
+    publicMasters,
     catalog,
     timeSlots,
     appointments,
@@ -164,6 +183,8 @@ export function createApp(deps: AppDeps) {
     stats,
     dailyStatsJob,
     photos,
+    promotions,
+    portfolio,
     profile,
     tokens: deps.tokens,
   };
