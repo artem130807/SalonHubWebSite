@@ -15,6 +15,7 @@ import {
   User,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserRole } from "@/server/domain/types";
 import { salonsHref } from "@/lib/catalog";
 
@@ -80,6 +81,7 @@ export function SiteHeader({ viewer }: { viewer: SiteViewer }) {
                 </Link>
               </>
             )}
+            <ThemeToggle />
             {viewer ? (
               <>
                 <Link href={cabinet} className="text-onSurface hover:text-primary transition-colors">
@@ -102,13 +104,16 @@ export function SiteHeader({ viewer }: { viewer: SiteViewer }) {
             )}
           </nav>
 
-          <Link
-            href={viewer ? cabinet : "/login"}
-            className="md:hidden text-onSurfaceVariant"
-            aria-label={viewer ? "Профиль" : "Войти"}
-          >
-            <User className="w-6 h-6" />
-          </Link>
+          <div className="md:hidden flex items-center gap-3">
+            <ThemeToggle />
+            <Link
+              href={viewer ? cabinet : "/login"}
+              className="text-onSurfaceVariant"
+              aria-label={viewer ? "Профиль" : "Войти"}
+            >
+              <User className="w-6 h-6" />
+            </Link>
+          </div>
         </div>
         <form onSubmit={onSearch} className="md:hidden pb-4">
           <label className="flex items-center gap-3 w-full bg-surface/40 hover:bg-surface/60 border border-outline/50 hover:border-outline rounded-2xl px-5 py-3 focus-within:border-primary focus-within:bg-surface focus-within:shadow-[0_0_15px_rgba(212,175,55,0.1)] transition-all">

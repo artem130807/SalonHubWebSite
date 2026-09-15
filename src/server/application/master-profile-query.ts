@@ -1,10 +1,23 @@
 import { err, ok } from "@/server/domain/result";
 import { isPromotionLive } from "@/server/domain/promotion-rules";
+import { dateOnly } from "@/server/domain/scheduling";
 import type { MasterProfile, PortfolioPhoto, Review, Salon, SalonPromotion, Service } from "@/server/domain/types";
+import { yearMonthOf } from "@/lib/date-only";
+import {
+  activeAppointments,
+  activeWindows,
+  buildPublicDaysForMaster,
+  previewDurationMinutes,
+  resolvePublicCalendarMonth,
+  utcRangeForCalendar,
+  type PublicCalendarDay,
+} from "@/server/application/public-calendar";
 import type {
+  IAppointmentRepository,
   IClock,
   IMasterProfileRepository,
   IMasterServiceRepository,
+  IMasterTimeSlotRepository,
   IPortfolioRepository,
   IPromotionRepository,
   IReviewRepository,
@@ -22,6 +35,19 @@ export type PublicMasterWorkplace = {
   closingTime: string | null;
 };
 
+export type { PublicCalendarDay, PublicCalendarInterval } from "@/server/application/public-calendar";
+
+export type PublicMasterCalendar = {
+  month: string;
+  from: string;
+  to: string;
+  today: string;
+  previewDurationMinutes: number;
+  minMonth: string;
+  maxMonth: string;
+  days: PublicCalendarDay[];
+};
+
 export type PublicMasterProfile = {
   master: MasterProfile;
   salon: PublicMasterWorkplace;
@@ -29,6 +55,7 @@ export type PublicMasterProfile = {
   portfolio: PortfolioPhoto[];
   reviews: Review[];
   promotions: SalonPromotion[];
+  calendar: PublicMasterCalendar;
 };
 
 export function toPublicMasterWorkplace(salon: Salon): PublicMasterWorkplace {
@@ -52,14 +79,15 @@ export class PublicMasterProfileService {
     private readonly portfolio: IPortfolioRepository,
     private readonly reviews: IReviewRepository,
     private readonly promotions: IPromotionRepository,
+    private readonly timeSlots: IMasterTimeSlotRepository,
+    private readonly appointments: IAppointmentRepository,
     private readonly clock: IClock,
   ) {}
 
   async getById(masterId: string) {
-    const master = await this.masters.getById(masterId);
-    if (!master) return err("Мастер не найден");
-    const salon = await this.salons.getById(master.salonId);
-    if (!salon || !salon.isActive) return err("Мастер не найден");
+    const loaded = await this.loadWorkplace(masterId);
+    if (!loaded.ok) return loaded;
+    const { master, salon } = loaded.value;
 
     const [services, portfolio, reviews, promotions] = await Promise.all([
       this.masterServices.getServicesForMaster(master.id),
@@ -67,6 +95,8 @@ export class PublicMasterProfileService {
       this.reviews.listByMaster(master.id),
       this.promotions.listBySalon(salon.id),
     ]);
+    const calendar = await this.buildMonth(master.id, services, yearMonthOf(dateOnly(this.clock.utcNow())));
+    if (!calendar.ok) return calendar;
 
     return ok({
       master,
@@ -75,6 +105,43 @@ export class PublicMasterProfileService {
       portfolio,
       reviews,
       promotions: promotions.filter((item) => isPromotionLive(item, this.clock.utcNow())),
+      calendar: calendar.value,
     } satisfies PublicMasterProfile);
+  }
+
+  async getCalendar(masterId: string, month?: string | null) {
+    const loaded = await this.loadWorkplace(masterId);
+    if (!loaded.ok) return loaded;
+    const services = await this.masterServices.getServicesForMaster(loaded.value.master.id);
+    return this.buildMonth(loaded.value.master.id, services, month);
+  }
+
+  private async loadWorkplace(masterId: string) {
+    const master = await this.masters.getById(masterId);
+    if (!master) return err("Мастер не найден");
+    const salon = await this.salons.getById(master.salonId);
+    if (!salon || !salon.isActive) return err("Мастер не найден");
+    return ok({ master, salon });
+  }
+
+  private async buildMonth(masterId: string, services: Service[], month?: string | null) {
+    const meta = resolvePublicCalendarMonth(dateOnly(this.clock.utcNow()), month);
+    if (!meta.ok) return meta;
+    const range = utcRangeForCalendar(meta.value.from, meta.value.to);
+    const [slots, appointments] = await Promise.all([
+      this.timeSlots.getByMasterAndDateRange(masterId, meta.value.from, meta.value.to),
+      this.appointments.list({ masterId, from: range.from, to: range.to }),
+    ]);
+    const duration = previewDurationMinutes(services);
+    return ok({
+      ...meta.value,
+      previewDurationMinutes: duration,
+      days: buildPublicDaysForMaster(
+        activeWindows(slots),
+        activeAppointments(appointments),
+        duration,
+        this.clock.utcNow(),
+      ),
+    } satisfies PublicMasterCalendar);
   }
 }

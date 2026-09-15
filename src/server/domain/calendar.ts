@@ -1,18 +1,10 @@
+import { addDateOnly } from "@/lib/date-only";
 import { dateOnly, zonedParts } from "@/server/domain/scheduling";
 
-export function addDateOnly(date: string, days: number) {
-  const [year, month, day] = date.split("-").map(Number);
-  const utc = new Date(Date.UTC(year!, month! - 1, day! + days));
-  return utc.toISOString().slice(0, 10);
-}
+export { addDateOnly, eachDateOnly } from "@/lib/date-only";
 
-export function eachDateOnly(fromInclusive: string, toExclusive: string) {
-  const dates: string[] = [];
-  for (let cursor = fromInclusive; cursor < toExclusive; cursor = addDateOnly(cursor, 1)) {
-    dates.push(cursor);
-  }
-  return dates;
-}
+export const PUBLIC_CALENDAR_PAST_MONTHS = 2;
+export const PUBLIC_CALENDAR_FUTURE_MONTHS = 6;
 
 export function utcRangeForDateOnly(date: string) {
   const from = new Date(`${date}T00:00:00.000Z`);

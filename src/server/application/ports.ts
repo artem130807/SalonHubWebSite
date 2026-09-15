@@ -140,7 +140,9 @@ export interface IMasterServiceRepository {
 export interface IMasterTimeSlotRepository {
   getById(id: string): Promise<MasterTimeSlot | null>;
   getByMasterAndDate(masterId: string, date: string): Promise<MasterTimeSlot[]>;
+  getByMasterAndDateRange(masterId: string, fromInclusive: string, toExclusive: string): Promise<MasterTimeSlot[]>;
   getBySalonAndDate(salonId: string, date: string): Promise<MasterTimeSlot[]>;
+  getBySalonAndDateRange(salonId: string, fromInclusive: string, toExclusive: string): Promise<MasterTimeSlot[]>;
   add(slot: MasterTimeSlot): Promise<void>;
   addMany(slots: MasterTimeSlot[]): Promise<void>;
   delete(id: string): Promise<void>;

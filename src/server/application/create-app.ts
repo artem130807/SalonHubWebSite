@@ -45,6 +45,7 @@ import {
 } from "@/server/application/platform-services";
 import { PortfolioService, PromotionService } from "@/server/application/catalog-content-services";
 import { PublicMasterProfileService } from "@/server/application/master-profile-query";
+import { PublicSalonScheduleService } from "@/server/application/salon-calendar-query";
 import { DailyStatsJobService } from "@/server/application/daily-stats-job";
 
 const silentNotifier: INotifier = {
@@ -164,6 +165,17 @@ export function createApp(deps: AppDeps) {
     deps.portfolio,
     deps.reviews,
     deps.promotions,
+    deps.timeSlots,
+    deps.appointments,
+    deps.clock,
+  );
+  const salonSchedule = new PublicSalonScheduleService(
+    deps.salons,
+    deps.masters,
+    deps.services,
+    deps.masterServices,
+    deps.timeSlots,
+    deps.appointments,
     deps.clock,
   );
 
@@ -172,6 +184,7 @@ export function createApp(deps: AppDeps) {
     salons,
     masters,
     publicMasters,
+    salonSchedule,
     catalog,
     timeSlots,
     appointments,

@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Clock, MapPin, Phone, Star } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Phone, Star } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PhotoCarousel } from "@/components/site/PhotoCarousel";
 import { SalonBookingButton } from "@/components/site/SalonBookingButton";
+import { MasterScheduleCalendar } from "@/components/site/MasterScheduleCalendar";
 import { bestDiscountForService, discountedPrice } from "@/server/domain/promotion-rules";
-import { ratingCountLabel } from "@/lib/locale";
+import { humanDate, ratingCountLabel } from "@/lib/locale";
 import type { PublicMasterProfile } from "@/server/application/master-profile-query";
 
 function dateLabel(value: Date | string | null) {
@@ -16,10 +17,27 @@ function dateLabel(value: Date | string | null) {
   return parsed.toISOString().slice(0, 10);
 }
 
+function nearestWindow(profile: PublicMasterProfile) {
+  const upcoming =
+    profile.calendar.days.find(
+      (day) => day.date > profile.calendar.today || (day.date === profile.calendar.today && day.freeStartCount > 0),
+    ) ?? profile.calendar.days.find((day) => day.date >= profile.calendar.today && day.windows.length > 0);
+  if (!upcoming) return null;
+  const window = upcoming.windows[0];
+  if (!window) return null;
+  return {
+    date: upcoming.date,
+    startTime: window.startTime,
+    endTime: upcoming.windows[upcoming.windows.length - 1]?.endTime ?? window.endTime,
+    freeStartCount: upcoming.freeStartCount,
+  };
+}
+
 export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
-  const { master, salon, services, portfolio, reviews, promotions } = profile;
+  const { master, salon, services, portfolio, reviews, promotions, calendar } = profile;
   const offers = promotions.map((item) => ({ discountPercent: item.discountPercent, serviceId: item.serviceId }));
   const address = `${salon.city}, ${salon.street}, ${salon.building}`;
+  const nextWindow = nearestWindow(profile);
 
   return (
     <SiteShell>
@@ -68,6 +86,12 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
                         {salon.openingTime ?? "—"}–{salon.closingTime ?? "—"}
                       </p>
                     )}
+                    {nextWindow && (
+                      <p className="flex items-center gap-2.5 text-onSurface">
+                        <CalendarDays className="w-5 h-5 text-primary shrink-0" />
+                        Ближайшее окно: {humanDate(nextWindow.date)}, {nextWindow.startTime}–{nextWindow.endTime}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -82,6 +106,17 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
             </div>
           </div>
         </section>
+
+        <MasterScheduleCalendar
+          masterId={master.id}
+          salonId={salon.id}
+          initialCalendar={calendar}
+          services={services.map((service) => ({
+            id: service.id,
+            name: service.name,
+            durationMinutes: service.durationMinutes,
+          }))}
+        />
 
         {master.bio && (
           <section className="bg-surface/30 p-6 rounded-3xl border border-outline/30">

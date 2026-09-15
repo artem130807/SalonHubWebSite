@@ -100,22 +100,25 @@ export function BookingModal({
   initialSalons,
   selectedSalonId,
   selectedMasterId,
+  selectedDate,
 }: {
   dialogRef: RefObject<HTMLDialogElement | null>;
   initialSalons: Salon[];
   selectedSalonId?: string;
   selectedMasterId?: string;
+  selectedDate?: string;
 }) {
   const router = useRouter();
   const today = toDateOnly(new Date());
+  const openingDate = selectedDate && selectedDate >= today ? selectedDate : today;
   const [step, setStep] = useState<Step>(() => initialStep(selectedSalonId, selectedMasterId));
   const [salonId, setSalonId] = useState(selectedSalonId ?? "");
   const [masters, setMasters] = useState<Master[]>([]);
   const [masterId, setMasterId] = useState(selectedMasterId ?? "");
   const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState("");
-  const [date, setDate] = useState(today);
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const [date, setDate] = useState(openingDate);
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(parseDateOnly(openingDate)));
   const [slotsByDate, setSlotsByDate] = useState<Record<string, Slot[]>>({});
   const [startTime, setStartTime] = useState("");
   const [loadingMasters, setLoadingMasters] = useState(false);
@@ -240,8 +243,8 @@ export function BookingModal({
     }
     if (step === "service") {
       if (!serviceId) return setError("Выберите услугу");
-      setDate(today);
-      setWeekStart(startOfWeek(new Date()));
+      setDate(openingDate);
+      setWeekStart(startOfWeek(parseDateOnly(openingDate)));
       setStartTime("");
       setStep("time");
     }

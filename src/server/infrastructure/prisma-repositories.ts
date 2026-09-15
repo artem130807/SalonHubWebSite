@@ -392,9 +392,35 @@ export const prismaTimeSlots: IMasterTimeSlotRepository = {
     });
     return rows.map(mapSlot);
   },
+  getByMasterAndDateRange: async (masterId, fromInclusive, toExclusive) => {
+    const rows = await prisma.masterTimeSlot.findMany({
+      where: {
+        masterId,
+        scheduleDate: {
+          gte: new Date(`${fromInclusive}T00:00:00.000Z`),
+          lt: new Date(`${toExclusive}T00:00:00.000Z`),
+        },
+      },
+      orderBy: [{ scheduleDate: "asc" }, { startTime: "asc" }],
+    });
+    return rows.map(mapSlot);
+  },
   getBySalonAndDate: async (salonId, date) => {
     const rows = await prisma.masterTimeSlot.findMany({
       where: { master: { salonId }, scheduleDate: new Date(`${date}T00:00:00.000Z`) },
+    });
+    return rows.map(mapSlot);
+  },
+  getBySalonAndDateRange: async (salonId, fromInclusive, toExclusive) => {
+    const rows = await prisma.masterTimeSlot.findMany({
+      where: {
+        master: { salonId },
+        scheduleDate: {
+          gte: new Date(`${fromInclusive}T00:00:00.000Z`),
+          lt: new Date(`${toExclusive}T00:00:00.000Z`),
+        },
+      },
+      orderBy: [{ scheduleDate: "asc" }, { startTime: "asc" }],
     });
     return rows.map(mapSlot);
   },

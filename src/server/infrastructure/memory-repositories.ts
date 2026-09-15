@@ -271,9 +271,20 @@ export class InMemoryTimeSlotRepository implements IMasterTimeSlotRepository {
   async getByMasterAndDate(masterId: string, date: string) {
     return this.db.timeSlots.filter((s) => s.masterId === masterId && s.scheduleDate === date);
   }
+  async getByMasterAndDateRange(masterId: string, fromInclusive: string, toExclusive: string) {
+    return this.db.timeSlots.filter(
+      (s) => s.masterId === masterId && s.scheduleDate >= fromInclusive && s.scheduleDate < toExclusive,
+    );
+  }
   async getBySalonAndDate(salonId: string, date: string) {
     const masterIds = this.db.masters.filter((m) => m.salonId === salonId).map((m) => m.id);
     return this.db.timeSlots.filter((s) => masterIds.includes(s.masterId) && s.scheduleDate === date);
+  }
+  async getBySalonAndDateRange(salonId: string, fromInclusive: string, toExclusive: string) {
+    const masterIds = this.db.masters.filter((m) => m.salonId === salonId).map((m) => m.id);
+    return this.db.timeSlots.filter(
+      (s) => masterIds.includes(s.masterId) && s.scheduleDate >= fromInclusive && s.scheduleDate < toExclusive,
+    );
   }
   async add(slot: MasterTimeSlot) {
     this.db.timeSlots.push(slot);

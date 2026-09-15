@@ -23,6 +23,7 @@ import {
 import type { ReactNode } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import { NotificationListener } from "@/components/NotificationListener";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -135,7 +136,8 @@ export function DashboardLayout({ children, role, name }: DashboardLayoutProps) 
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <ThemeToggle />
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-onBackground">
                 {name ?? (role === "admin" ? "Администратор" : role === "barber" ? "Мастер" : "Клиент")}

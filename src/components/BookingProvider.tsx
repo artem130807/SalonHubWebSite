@@ -15,7 +15,7 @@ import { BookingModal } from "@/components/BookingModal";
 type SalonOption = { id: string; name: string; address: string; availableStartsToday: number };
 
 type BookingContextValue = {
-  openBooking: (salonId?: string, masterId?: string) => void;
+  openBooking: (salonId?: string, masterId?: string, date?: string) => void;
 };
 
 const BookingContext = createContext<BookingContextValue | null>(null);
@@ -30,12 +30,14 @@ export function BookingProvider({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [selectedSalonId, setSelectedSalonId] = useState("");
   const [selectedMasterId, setSelectedMasterId] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [open, setOpen] = useState(false);
   const [instance, setInstance] = useState(0);
 
-  const openBooking = useCallback((salonId?: string, masterId?: string) => {
+  const openBooking = useCallback((salonId?: string, masterId?: string, date?: string) => {
     setSelectedSalonId(salonId ?? "");
     setSelectedMasterId(masterId ?? "");
+    setSelectedDate(date ?? "");
     setInstance((value) => value + 1);
     setOpen(true);
   }, []);
@@ -61,6 +63,7 @@ export function BookingProvider({
         initialSalons={salons}
         selectedSalonId={selectedSalonId || undefined}
         selectedMasterId={selectedMasterId || undefined}
+        selectedDate={selectedDate || undefined}
       />
     </BookingContext.Provider>
   );

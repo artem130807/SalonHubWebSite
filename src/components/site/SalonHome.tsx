@@ -4,7 +4,9 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { SalonBookingButton } from "@/components/site/SalonBookingButton";
 import { PhotoCarousel } from "@/components/site/PhotoCarousel";
 import { SalonMasterBookButton } from "@/components/site/SalonMasterBookButton";
+import { SalonScheduleCalendar } from "@/components/site/SalonScheduleCalendar";
 import { bestDiscountForService, discountedPrice } from "@/server/domain/promotion-rules";
+import type { PublicSalonCalendar } from "@/server/application/salon-calendar-query";
 import type { MasterProfile, Review, Salon, SalonPhoto, SalonPromotion, Service } from "@/server/domain/types";
 
 function dateLabel(value: Date | string | null) {
@@ -19,6 +21,7 @@ export function SalonHome({
   masters,
   services,
   reviews,
+  calendar,
 }: {
   salon: Salon;
   photos: SalonPhoto[];
@@ -26,6 +29,7 @@ export function SalonHome({
   masters: MasterProfile[];
   services: Service[];
   reviews: Review[];
+  calendar: PublicSalonCalendar;
 }) {
   const offers = promotions.map((item) => ({ discountPercent: item.discountPercent, serviceId: item.serviceId }));
 
@@ -78,6 +82,8 @@ export function SalonHome({
             </div>
           </div>
         </section>
+
+        <SalonScheduleCalendar salonId={salon.id} initialCalendar={calendar} />
 
         {salon.description && (
           <section className="bg-surface/30 p-6 rounded-3xl border border-outline/30">

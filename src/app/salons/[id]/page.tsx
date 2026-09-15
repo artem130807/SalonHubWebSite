@@ -8,13 +8,15 @@ export default async function SalonPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const salonResult = await getApp().salons.getById(id);
   if (!salonResult.ok) notFound();
-  const [photos, promotions, masters, services, reviews] = await Promise.all([
+  const [photos, promotions, masters, services, reviews, calendar] = await Promise.all([
     getApp().photos.list(id),
     getApp().promotions.listPublic(id),
     getApp().masters.getBySalon(id),
     getApp().catalog.getBySalon(id, true),
     getApp().reviews.bySalon(id),
+    getApp().salonSchedule.getCalendar(id),
   ]);
+  if (!calendar.ok) notFound();
 
   return (
     <SalonHome
@@ -24,6 +26,7 @@ export default async function SalonPage({ params }: { params: Promise<{ id: stri
       masters={masters.ok ? masters.value : []}
       services={services.ok ? services.value : []}
       reviews={reviews.ok ? reviews.value : []}
+      calendar={calendar.value}
     />
   );
 }

@@ -97,7 +97,7 @@ export function PhotoCarousel({
               key={photo.id}
               type="button"
               aria-label={`Фото ${photoIndex + 1}`}
-              className={`h-1.5 rounded-full transition-all ${photoIndex === index ? "w-6 bg-primary" : "w-1.5 bg-white/50"}`}
+              className={`h-1.5 rounded-full transition-all ${photoIndex === index ? "w-6 bg-primary" : "w-1.5 bg-onBackground/55"}`}
               onClick={() => setIndex(photoIndex)}
             />
           ))}
