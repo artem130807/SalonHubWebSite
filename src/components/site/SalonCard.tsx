@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { useBooking } from "@/components/BookingProvider";
+import { bookingCallToAction } from "@/lib/booking-access";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=800&h=500";
@@ -21,7 +22,7 @@ export type SalonCardModel = {
 };
 
 export function SalonCard({ salon }: { salon: SalonCardModel }) {
-  const { openBooking } = useBooking();
+  const { openBooking, access } = useBooking();
   const image = salon.photoUrl || fallbackImage;
 
   return (
@@ -71,7 +72,7 @@ export function SalonCard({ salon }: { salon: SalonCardModel }) {
             className="bg-primary text-onPrimary rounded-2xl py-3 text-sm font-bold hover:bg-primaryVariant transition-colors shadow-[0_4px_15px_rgba(212,175,55,0.2)] hover:shadow-[0_6px_20px_rgba(212,175,55,0.4)]"
             onClick={() => openBooking(salon.id)}
           >
-            Записаться
+            {bookingCallToAction(access, "Записаться")}
           </button>
         </div>
       </div>

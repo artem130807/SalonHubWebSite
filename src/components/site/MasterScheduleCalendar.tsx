@@ -1,20 +1,41 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin } from "lucide-react";
+import { BookingAccessNote } from "@/components/site/BookingAccessNote";
 import { useBooking } from "@/components/BookingProvider";
 import { apiFetch } from "@/lib/client-api";
+import { bookingCallToAction } from "@/lib/booking-access";
 import { addDateOnly, addMonths, dayOfMonth, eachDateOnly, weekdayMonday0, yearMonthOf } from "@/lib/date-only";
-import { humanDate, monthTitle, WEEKDAYS_SHORT } from "@/lib/locale";
+import { humanDate, monthTitle, streetAddress, WEEKDAYS_SHORT } from "@/lib/locale";
 import { DayTimeline, formatClock, LegendDot } from "@/components/site/schedule/SchedulePrimitives";
 
 type Interval = { startTime: string; endTime: string };
-type CalendarDay = {
+type WorkplaceDay = {
+  salonId: string;
   date: string;
   windows: Interval[];
   busy: Interval[];
   starts: Interval[];
   freeStartCount: number;
+};
+type CalendarDay = {
+  date: string;
+  workingSalonCount: number;
+  freeSalonCount: number;
+  freeStartCount: number;
+  workplaces: WorkplaceDay[];
+};
+type Workplace = {
+  id: string;
+  name: string;
+  city: string;
+  street: string;
+  building: string;
+  phone: string | null;
+  openingTime: string | null;
+  closingTime: string | null;
 };
 export type MasterCalendarData = {
   month: string;
@@ -24,16 +45,32 @@ export type MasterCalendarData = {
   previewDurationMinutes: number;
   minMonth: string;
   maxMonth: string;
+  workplaces: Workplace[];
   days: CalendarDay[];
 };
 type ServiceOption = { id: string; name: string; durationMinutes: number };
 
-function pickDate(calendar: MasterCalendarData, preferred?: string) {
+function summarizeDay(workplaces: WorkplaceDay[]): Omit<CalendarDay, "date" | "workplaces"> {
+  return {
+    workingSalonCount: workplaces.length,
+    freeSalonCount: workplaces.filter((item) => item.freeStartCount > 0).length,
+    freeStartCount: workplaces.reduce((sum, item) => sum + item.freeStartCount, 0),
+  };
+}
+
+function pickDate(calendar: MasterCalendarData, preferred?: string, salonId?: string) {
+  const matches = (day: CalendarDay) =>
+    !salonId || day.workplaces.some((item) => item.salonId === salonId && item.freeStartCount > 0);
   if (preferred && preferred >= calendar.from && preferred < calendar.to) return preferred;
-  const nextFree = calendar.days.find((day) => day.date >= calendar.today && day.freeStartCount > 0);
+  const nextFree = calendar.days.find((day) => day.date >= calendar.today && matches(day) && day.freeStartCount > 0);
   if (nextFree) return nextFree.date;
   if (calendar.today >= calendar.from && calendar.today < calendar.to) return calendar.today;
   return `${calendar.month}-01`;
+}
+
+function firstWindowRange(day: WorkplaceDay | undefined) {
+  if (!day || day.windows.length === 0) return null;
+  return `${formatClock(day.windows[0]!.startTime)}–${formatClock(day.windows[day.windows.length - 1]!.endTime)}`;
 }
 
 export function MasterScheduleCalendar({
@@ -47,12 +84,13 @@ export function MasterScheduleCalendar({
   initialCalendar: MasterCalendarData;
   services: ServiceOption[];
 }) {
-  const { openBooking } = useBooking();
+  const { openBooking, access } = useBooking();
   const shortest = useMemo(
     () => services.slice().sort((left, right) => left.durationMinutes - right.durationMinutes)[0] ?? null,
     [services],
   );
   const [calendar, setCalendar] = useState(initialCalendar);
+  const [workplaceId, setWorkplaceId] = useState("");
   const [selectedDate, setSelectedDate] = useState(() => pickDate(initialCalendar));
   const [serviceId, setServiceId] = useState(shortest?.id ?? "");
   const [customStarts, setCustomStarts] = useState<Interval[] | null>(null);
@@ -61,18 +99,31 @@ export function MasterScheduleCalendar({
   const [error, setError] = useState("");
   const monthRequest = useRef(0);
 
-  const daysByDate = useMemo(
-    () => new Map(calendar.days.map((day) => [day.date, day])),
-    [calendar.days],
-  );
+  const roster = useMemo(() => new Map(calendar.workplaces.map((item) => [item.id, item])), [calendar.workplaces]);
+  const dates = useMemo(() => eachDateOnly(calendar.from, calendar.to), [calendar.from, calendar.to]);
+  const daysByDate = useMemo(() => {
+    const map = new Map<string, CalendarDay>();
+    for (const day of calendar.days) {
+      const workplaces = workplaceId ? day.workplaces.filter((item) => item.salonId === workplaceId) : day.workplaces;
+      if (workplaceId && workplaces.length === 0) continue;
+      map.set(day.date, { ...day, workplaces, ...summarizeDay(workplaces) });
+    }
+    return map;
+  }, [calendar.days, workplaceId]);
   const selected = daysByDate.get(selectedDate);
   const usingPreview = !serviceId || serviceId === shortest?.id;
-  const starts = usingPreview ? (selected?.starts ?? []) : (customStarts ?? []);
-  const canBook =
+  const previewStarts = selected?.workplaces.flatMap((item) => item.starts) ?? [];
+  const starts = usingPreview ? previewStarts : (customStarts ?? []);
+  const slotAvailable =
     selectedDate >= calendar.today &&
     !loadingStarts &&
     (usingPreview ? (selected?.freeStartCount ?? 0) > 0 : (customStarts?.length ?? 0) > 0);
-  const dates = useMemo(() => eachDateOnly(calendar.from, calendar.to), [calendar.from, calendar.to]);
+  const bookSalonId = selected?.workplaces.find((item) => item.freeStartCount > 0)?.salonId ?? salonId;
+
+  useEffect(() => {
+    if (!workplaceId || daysByDate.has(selectedDate)) return;
+    setSelectedDate(pickDate(calendar, undefined, workplaceId));
+  }, [calendar, daysByDate, workplaceId, selectedDate]);
 
   useEffect(() => {
     if (usingPreview || !selectedDate) {
@@ -115,7 +166,7 @@ export function MasterScheduleCalendar({
   async function loadMonth(month: string, nextDate?: string) {
     if (month < calendar.minMonth || month > calendar.maxMonth) return;
     if (month === calendar.month && nextDate) {
-      setSelectedDate(pickDate(calendar, nextDate));
+      setSelectedDate(pickDate(calendar, nextDate, workplaceId));
       return;
     }
     const request = ++monthRequest.current;
@@ -131,7 +182,7 @@ export function MasterScheduleCalendar({
       }
       const next = payload as MasterCalendarData;
       setCalendar(next);
-      setSelectedDate(pickDate(next, nextDate));
+      setSelectedDate(pickDate(next, nextDate, workplaceId));
     } catch {
       if (request === monthRequest.current) setError("Не удалось открыть месяц");
     } finally {
@@ -181,14 +232,12 @@ export function MasterScheduleCalendar({
     selectDate(addDateOnly(selectedDate, delta));
   }
 
-  const windowsLabel = selected?.windows.map((item) => `${formatClock(item.startTime)}–${formatClock(item.endTime)}`).join(", ");
-
   return (
     <section className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <h2 className="text-3xl font-serif font-bold">Расписание</h2>
-          <p className="text-onSurfaceVariant mt-1">Рабочие дни и свободное время мастера</p>
+          <p className="text-onSurfaceVariant mt-1">Где и когда мастер принимает клиентов</p>
         </div>
         <button
           type="button"
@@ -198,6 +247,22 @@ export function MasterScheduleCalendar({
           Сегодня
         </button>
       </div>
+
+      <BookingAccessNote />
+
+      {calendar.workplaces.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          <FilterChip active={!workplaceId} onClick={() => setWorkplaceId("")} label="Все заведения" />
+          {calendar.workplaces.map((workplace) => (
+            <FilterChip
+              key={workplace.id}
+              active={workplaceId === workplace.id}
+              onClick={() => setWorkplaceId(workplace.id)}
+              label={workplace.name}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(19rem,0.8fr)] gap-5">
         <div className="bg-surface/50 border border-outline/50 rounded-[1.75rem] p-4 sm:p-6 shadow-sm relative overflow-hidden">
@@ -245,8 +310,9 @@ export function MasterScheduleCalendar({
                 const isToday = date === calendar.today;
                 const isSelected = date === selectedDate;
                 const past = date < calendar.today;
-                const working = (day?.windows.length ?? 0) > 0;
-                const free = day?.freeStartCount ?? 0;
+                const working = (day?.workingSalonCount ?? 0) > 0;
+                const free = day?.freeSalonCount ?? 0;
+                const range = firstWindowRange(day?.workplaces[0]);
                 return (
                   <button
                     key={date}
@@ -254,7 +320,7 @@ export function MasterScheduleCalendar({
                     role="gridcell"
                     aria-selected={isSelected}
                     aria-current={isToday ? "date" : undefined}
-                    aria-label={dayLabel(date, day, isToday)}
+                    aria-label={dayLabel(date, day, roster, isToday)}
                     onClick={() => selectDate(date)}
                     className={`relative min-h-[3.5rem] sm:min-h-[4.25rem] rounded-2xl px-1 py-1.5 flex flex-col items-center justify-start gap-0.5 transition-all ${
                       isSelected
@@ -269,9 +335,9 @@ export function MasterScheduleCalendar({
                     <span className={`text-sm font-bold leading-none ${isSelected ? "" : past ? "text-onSurfaceVariant" : ""}`}>
                       {dayOfMonth(date)}
                     </span>
-                    {working && (
+                    {working && range && (
                       <span className={`hidden sm:block text-[10px] leading-tight truncate max-w-full ${isSelected ? "text-onPrimary/80" : "text-onSurfaceVariant"}`}>
-                        {formatClock(day!.windows[0]!.startTime)}–{formatClock(day!.windows[day!.windows.length - 1]!.endTime)}
+                        {range}
                       </span>
                     )}
                     <span className="flex gap-0.5 mt-auto mb-0.5 min-h-[6px]">
@@ -282,7 +348,7 @@ export function MasterScheduleCalendar({
                           }`}
                         />
                       ) : null}
-                      {free > 8 && (
+                      {free > 1 && (
                         <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-onPrimary" : "bg-primary"}`} />
                       )}
                     </span>
@@ -310,11 +376,39 @@ export function MasterScheduleCalendar({
             </div>
           ) : (
             <>
-              <p className="text-sm text-onSurfaceVariant mt-3 inline-flex items-start gap-2">
-                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span>Окна: {windowsLabel}</span>
-              </p>
-              <DayTimeline windows={selected.windows} busy={selected.busy} />
+              <div className="mt-4 space-y-3">
+                {selected.workplaces.map((item) => {
+                  const workplace = roster.get(item.salonId);
+                  if (!workplace) return null;
+                  const bookable = selectedDate >= calendar.today && item.freeStartCount > 0;
+                  return (
+                    <article key={item.salonId} className="rounded-3xl border border-outline bg-background p-4">
+                      <Link href={`/salons/${workplace.id}`} className="font-bold hover:text-primary block">
+                        {workplace.name}
+                      </Link>
+                      <p className="text-xs text-onSurfaceVariant mt-1 inline-flex items-start gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                        {streetAddress(workplace)}
+                      </p>
+                      <p className="text-xs text-onSurfaceVariant mt-2 inline-flex items-start gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                        {item.windows.map((window) => `${formatClock(window.startTime)}–${formatClock(window.endTime)}`).join(", ")}
+                      </p>
+                      <DayTimeline windows={item.windows} busy={item.busy} compact />
+                      <button
+                        type="button"
+                        disabled={!bookable}
+                        onClick={() => openBooking(workplace.id, masterId, selectedDate)}
+                        className="mt-3 w-full bg-primary text-onPrimary text-sm font-bold py-2 rounded-xl hover:bg-primaryVariant disabled:opacity-40"
+                      >
+                        {bookable
+                          ? bookingCallToAction(access, "Записаться в это заведение")
+                          : "Нет свободного времени"}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
 
               {services.length > 1 && (
                 <div className="flex flex-wrap gap-2 mt-5">
@@ -368,11 +462,13 @@ export function MasterScheduleCalendar({
 
           <button
             type="button"
-            disabled={!canBook}
-            onClick={() => openBooking(salonId, masterId, selectedDate)}
+            disabled={!slotAvailable}
+            onClick={() => openBooking(bookSalonId, masterId, selectedDate)}
             className="mt-auto w-full bg-primary text-onPrimary font-bold py-3.5 rounded-2xl hover:bg-primaryVariant disabled:opacity-40 shadow-[0_4px_15px_rgba(212,175,55,0.22)]"
           >
-            {canBook ? `Записаться на ${humanDate(selectedDate)}` : "На этот день запись недоступна"}
+            {slotAvailable
+              ? bookingCallToAction(access, `Записаться на ${humanDate(selectedDate)}`)
+              : "На этот день запись недоступна"}
           </button>
         </aside>
       </div>
@@ -380,10 +476,27 @@ export function MasterScheduleCalendar({
   );
 }
 
-function dayLabel(date: string, day: CalendarDay | undefined, isToday: boolean) {
+function FilterChip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+        active ? "bg-primary text-onPrimary border-primary" : "border-outline hover:border-primary/60"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function dayLabel(date: string, day: CalendarDay | undefined, roster: Map<string, Workplace>, isToday: boolean) {
   const base = humanDate(date);
-  if (isToday && !day) return `${base}, сегодня, выходной`;
-  if (!day) return `${base}, выходной`;
-  if (day.freeStartCount > 0) return `${base}, ${day.windows.length} окон, ${day.freeStartCount} свободных стартов`;
-  return `${base}, рабочие окна есть, свободного времени нет`;
+  if (!day) return `${base}${isToday ? ", сегодня" : ""}, выходной`;
+  const names = day.workplaces
+    .map((item) => roster.get(item.salonId)?.name)
+    .filter(Boolean)
+    .join(", ");
+  if (day.freeStartCount > 0) return `${base}, свободно в ${names}`;
+  return `${base}, принимает в ${names}, свободного времени нет`;
 }

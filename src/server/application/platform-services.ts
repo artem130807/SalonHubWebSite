@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 import { err, ok } from "@/server/domain/result";
 import { applyRating, isValidStarRating, removeRating } from "@/server/domain/rating";
 import { isAllowedPhotoUrl, isUuid, SALON_PHOTO_LIMITS } from "@/server/domain/media";
-import { addDailyTotals, EMPTY_DAILY_TOTALS, tallyAppointments } from "@/server/domain/stats";
-import { eachDateOnly, isoDateOnly, utcRangeForDateOnly } from "@/server/domain/calendar";
+import { analyticsPeriodRange, buildAnalyticsReport } from "@/server/domain/analytics";
+import { isoDateOnly } from "@/server/domain/calendar";
 import { dateOnly, isValidClockTime, isValidDateOnly, normalizeClockTime, toMinutes } from "@/server/domain/scheduling";
 import {
   AppointmentStatus,
@@ -23,7 +23,6 @@ import type {
   IChatMessageRepository,
   IClock,
   IConversationRepository,
-  IDailyStatsRepository,
   IInboxRepository,
   IMasterProfileRepository,
   INotifier,
@@ -535,16 +534,16 @@ export class StatsService {
   constructor(
     private readonly appointments: IAppointmentRepository,
     private readonly masters: IMasterProfileRepository,
+    private readonly timeSlots: IMasterTimeSlotRepository,
+    private readonly reviews: IReviewRepository,
     private readonly clock: IClock,
-    private readonly dailyStats: IDailyStatsRepository,
   ) {}
 
   async salon(viewer: SessionPayload, salonId: string, period: "week" | "month" | "year", date = this.clock.utcNow()) {
     if (viewer.role !== UserRole.SalonAdmin || viewer.salonId !== salonId) {
       return err("Нет прав на статистику салона");
     }
-    const range = periodRange(period, date);
-    return ok(await this.collect({ salonId }, range, date));
+    return ok(await this.collect({ salonId }, "salon", analyticsPeriodRange(period, date)));
   }
 
   async master(viewer: SessionPayload, masterId: string, period: "week" | "month" | "year", date = this.clock.utcNow()) {
@@ -553,8 +552,7 @@ export class StatsService {
     const isOwn = viewer.role === UserRole.Master && viewer.masterProfileId === masterId;
     const isAdmin = viewer.role === UserRole.SalonAdmin && viewer.salonId === master.salonId;
     if (!isOwn && !isAdmin) return err("Нет прав на статистику мастера");
-    const range = periodRange(period, date);
-    return ok(await this.collect({ masterId }, range, date));
+    return ok(await this.collect({ masterId }, "master", analyticsPeriodRange(period, date)));
   }
 
   async mine(viewer: SessionPayload, period: "week" | "month" | "year", date = this.clock.utcNow()) {
@@ -566,35 +564,27 @@ export class StatsService {
 
   private async collect(
     scope: { salonId?: string; masterId?: string },
-    range: { from: Date; to: Date; period: string },
-    now: Date,
+    kind: "salon" | "master",
+    range: { from: Date; to: Date; period: "week" | "month" | "year" },
   ) {
     const fromDate = isoDateOnly(range.from);
     const toDate = isoDateOnly(range.to);
-    const today = dateOnly(now);
-    const snapshots = scope.salonId
-      ? await this.dailyStats.listSalon(scope.salonId, fromDate, toDate)
-      : await this.dailyStats.listMaster(scope.masterId!, fromDate, toDate);
-    const usable = snapshots.filter((row) => row.statDate !== today);
-    const covered = new Set(usable.map((row) => row.statDate));
-    const days = eachDateOnly(fromDate, toDate);
-    const missing = days.filter((day) => day === today || !covered.has(day));
-
-    if (missing.length === days.length) {
-      const items = await this.appointments.list({ ...scope, from: range.from, to: range.to });
-      return { period: range.period, from: range.from.toISOString(), to: range.to.toISOString(), ...tallyAppointments(items) };
-    }
-
-    const live = [];
-    for (const day of missing) {
-      const window = utcRangeForDateOnly(day);
-      live.push(...(await this.appointments.list({ ...scope, from: window.from, to: window.to })));
-    }
-    const totals = addDailyTotals(
-      usable.reduce((acc, row) => addDailyTotals(acc, row), EMPTY_DAILY_TOTALS),
-      tallyAppointments(live),
-    );
-    return { period: range.period, from: range.from.toISOString(), to: range.to.toISOString(), ...totals };
+    const [appointments, windows, reviews] = await Promise.all([
+      this.appointments.list({ ...scope, from: range.from, to: range.to }),
+      scope.salonId
+        ? this.timeSlots.getBySalonAndDateRange(scope.salonId, fromDate, toDate)
+        : this.timeSlots.getByMasterAndDateRange(scope.masterId!, fromDate, toDate),
+      scope.salonId ? this.reviews.listBySalon(scope.salonId) : this.reviews.listByMaster(scope.masterId!),
+    ]);
+    return buildAnalyticsReport({
+      period: range.period,
+      from: range.from,
+      to: range.to,
+      scope: kind,
+      appointments,
+      windows,
+      reviews,
+    });
   }
 }
 
@@ -677,26 +667,6 @@ export class ProfileService {
   async cities(prefix?: string) {
     return ok(this.cityCatalog.list(prefix));
   }
-}
-
-function periodRange(period: "week" | "month" | "year", date: Date) {
-  const utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  if (period === "year") {
-    const from = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
-    const to = new Date(Date.UTC(utc.getUTCFullYear() + 1, 0, 1));
-    return { from, to, period };
-  }
-  if (period === "month") {
-    const from = new Date(Date.UTC(utc.getUTCFullYear(), utc.getUTCMonth(), 1));
-    const to = new Date(Date.UTC(utc.getUTCFullYear(), utc.getUTCMonth() + 1, 1));
-    return { from, to, period };
-  }
-  const weekday = (utc.getUTCDay() + 6) % 7;
-  const from = new Date(utc);
-  from.setUTCDate(utc.getUTCDate() - weekday);
-  const to = new Date(from);
-  to.setUTCDate(from.getUTCDate() + 7);
-  return { from, to, period };
 }
 
 export function appointmentNotice(kind: InboxMessageType, appointment: {

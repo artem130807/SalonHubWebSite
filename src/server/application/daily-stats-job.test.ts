@@ -10,6 +10,8 @@ import type {
   IDailyStatsRepository,
   IJobScheduler,
   IMasterProfileRepository,
+  IMasterTimeSlotRepository,
+  IReviewRepository,
   ISalonRepository,
 } from "@/server/application/ports";
 
@@ -137,31 +139,26 @@ describe("CronJobService", () => {
 });
 
 describe("StatsService reads snapshots without double-counting today", () => {
-  it("uses stored daily rows for closed days and live appointments for today", async () => {
-    const list = vi.fn(async (filter: { from?: Date }) => {
-      if (filter.from?.toISOString().startsWith("2026-09-03")) {
-        return [{ status: AppointmentStatus.Completed, price: 200 }];
-      }
-      return [];
-    });
-    const listMaster = vi.fn().mockResolvedValue([
-      { statDate: "2026-09-02", totalCount: 1, completedCount: 1, cancelledCount: 0, revenue: 1000 },
-    ]);
+  it("builds a live master report for the selected week", async () => {
+    const list = vi.fn().mockResolvedValue([]);
+    const getByMasterAndDateRange = vi.fn().mockResolvedValue([]);
+    const listByMaster = vi.fn().mockResolvedValue([]);
     const service = new StatsService(
       { list } as unknown as IAppointmentRepository,
       { getById: vi.fn().mockResolvedValue({ id: "m", salonId: "s" }) } as unknown as IMasterProfileRepository,
+      { getByMasterAndDateRange } as unknown as IMasterTimeSlotRepository,
+      { listByMaster } as unknown as IReviewRepository,
       { utcNow: () => new Date("2026-09-03T12:00:00.000Z") },
-      { listMaster, listSalon: vi.fn().mockResolvedValue([]) } as unknown as IDailyStatsRepository,
     );
     const result = await service.mine(
       { userId: "u", role: UserRole.Master, name: "Мастер", masterProfileId: "m" },
       "week",
       new Date("2026-09-03T12:00:00.000Z"),
     );
-    expect(result.ok && result.value.completedCount).toBe(2);
-    expect(result.ok && result.value.revenue).toBe(1200);
-    expect(listMaster).toHaveBeenCalled();
+    expect(result.ok && result.value.completedCount).toBe(0);
+    expect(result.ok && result.value.kpis.windowMinutes).toBe(0);
     expect(list).toHaveBeenCalled();
+    expect(getByMasterAndDateRange).toHaveBeenCalled();
   });
 });
 

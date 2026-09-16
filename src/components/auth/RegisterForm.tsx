@@ -4,14 +4,16 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { registerAction, type AuthFormState } from "@/app/actions/auth";
 import { CitySuggest } from "@/components/site/CitySuggest";
+import { withReturnTo } from "@/lib/safe-path";
 
 const initial: AuthFormState = {};
 
-export function RegisterForm() {
+export function RegisterForm({ from }: { from?: string }) {
   const [state, action, pending] = useActionState(registerAction, initial);
 
   return (
     <form action={action} className="space-y-4">
+      {from && <input type="hidden" name="from" value={from} />}
       {state.error && <p className="text-sm text-error">{state.error}</p>}
       <label className="block space-y-2">
         <span className="text-sm font-medium">Имя</span>
@@ -45,7 +47,7 @@ export function RegisterForm() {
       </button>
       <p className="text-sm text-onSurfaceVariant text-center">
         Уже есть аккаунт?{" "}
-        <Link href="/login" className="text-primary hover:underline">
+        <Link href={withReturnTo("/login", from)} className="text-primary hover:underline">
           Войти
         </Link>
       </p>

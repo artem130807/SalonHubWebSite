@@ -219,6 +219,8 @@ describe("platform reviews, walk-in, chat, templates", () => {
     );
     expect(stats.ok && stats.value.completedCount).toBe(1);
     expect(stats.ok && stats.value.revenue).toBe(1000);
+    expect(stats.ok && stats.value.kpis.occupancyRate).toBeGreaterThan(0);
+    expect(stats.ok && stats.value.services[0]?.name).toBe("Стрижка");
   });
 
   it("cancels overdue confirmed appointments and notifies participants", async () => {

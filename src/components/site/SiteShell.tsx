@@ -22,7 +22,7 @@ export async function SiteShell({
   const viewer = session ? { name: session.name, role: session.role } : null;
 
   return (
-    <BookingProvider salons={salons}>
+    <BookingProvider salons={salons} viewerRole={viewer?.role ?? null}>
       <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <NotificationListener />
         <SiteHeader viewer={viewer} />

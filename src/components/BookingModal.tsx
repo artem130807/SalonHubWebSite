@@ -313,7 +313,7 @@ export function BookingModal({
     setPending(false);
     if (!response.ok) {
       if (response.status === 401) {
-        router.push("/login?from=/");
+        router.push(`/login?from=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
       setError(payload.error ?? "Не удалось создать запись");

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BookingAccessNote } from "@/components/site/BookingAccessNote";
 import { useBooking } from "@/components/BookingProvider";
 import { apiFetch } from "@/lib/client-api";
+import { bookingCallToAction } from "@/lib/booking-access";
 import { addDateOnly, addMonths, dayOfMonth, eachDateOnly, weekdayMonday0, yearMonthOf } from "@/lib/date-only";
 import { humanDate, monthTitle, WEEKDAYS_SHORT } from "@/lib/locale";
 import { DayTimeline, formatClock, LegendDot } from "@/components/site/schedule/SchedulePrimitives";
@@ -69,7 +71,7 @@ export function SalonScheduleCalendar({
   salonId: string;
   initialCalendar: SalonCalendarData;
 }) {
-  const { openBooking } = useBooking();
+  const { openBooking, access } = useBooking();
   const [calendar, setCalendar] = useState(initialCalendar);
   const [masterId, setMasterId] = useState("");
   const [selectedDate, setSelectedDate] = useState(() => pickDate(initialCalendar));
@@ -175,6 +177,8 @@ export function SalonScheduleCalendar({
           Сегодня
         </button>
       </div>
+
+      <BookingAccessNote />
 
       {calendar.masters.length > 1 && (
         <div className="flex flex-wrap gap-2">
@@ -358,7 +362,7 @@ export function SalonScheduleCalendar({
                           onClick={() => openBooking(salonId, master.id, selectedDate)}
                           className="mt-3 w-full bg-primary text-onPrimary text-sm font-bold py-2 rounded-xl hover:bg-primaryVariant disabled:opacity-40"
                         >
-                          {bookable ? "Записаться к мастеру" : "Нет свободного времени"}
+                          {bookable ? bookingCallToAction(access, "Записаться к мастеру") : "Нет свободного времени"}
                         </button>
                       </div>
                     </div>
@@ -375,7 +379,9 @@ export function SalonScheduleCalendar({
               onClick={() => openBooking(salonId, undefined, selectedDate)}
               className="mt-4 w-full border border-outline font-bold py-3 rounded-2xl hover:border-primary hover:text-primary disabled:opacity-40"
             >
-              {canBookAnyone ? `Записаться на ${humanDate(selectedDate)}` : "На этот день запись недоступна"}
+              {canBookAnyone
+                ? bookingCallToAction(access, `Записаться на ${humanDate(selectedDate)}`)
+                : "На этот день запись недоступна"}
             </button>
           )}
         </aside>

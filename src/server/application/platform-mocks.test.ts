@@ -240,8 +240,15 @@ describe("StatsService with mocked clock", () => {
       getById: vi.fn().mockResolvedValue({ id: "m", salonId: "s", userId: "u" }),
     } as unknown as IMasterProfileRepository;
     const frozen = { utcNow: () => new Date("2026-01-15T12:00:00.000Z") };
-    const dailyStats = { listMaster: vi.fn().mockResolvedValue([]) };
-    const service = new StatsService(appointments, masters, frozen, dailyStats as never);
+    const timeSlots = { getByMasterAndDateRange: vi.fn().mockResolvedValue([]) };
+    const reviews = { listByMaster: vi.fn().mockResolvedValue([]) };
+    const service = new StatsService(
+      appointments,
+      masters,
+      timeSlots as never,
+      reviews as never,
+      frozen,
+    );
     await service.mine(
       { userId: "u", role: UserRole.Master, name: "Мастер", masterProfileId: "m" },
       "week",

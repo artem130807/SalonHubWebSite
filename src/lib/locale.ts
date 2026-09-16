@@ -49,3 +49,7 @@ export function humanDate(date: string) {
   const month = Number(date.slice(5, 7));
   return `${day} ${MONTHS_GENITIVE[month - 1] ?? date}`;
 }
+
+export function streetAddress(item: { city: string; street: string; building: string }) {
+  return `${item.city}, ${item.street}, ${item.building}`;
+}

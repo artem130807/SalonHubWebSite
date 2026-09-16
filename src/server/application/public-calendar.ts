@@ -20,6 +20,26 @@ export type PublicCalendarDay = {
   freeStartCount: number;
 };
 
+export type PublicCalendarWorkplaceDay = PublicCalendarDay & { salonId: string };
+
+export type PublicCalendarWorkplaceMonthDay = {
+  date: string;
+  workingSalonCount: number;
+  freeSalonCount: number;
+  freeStartCount: number;
+  workplaces: PublicCalendarWorkplaceDay[];
+};
+
+export function attachWorkplaceDays(salonId: string, days: PublicCalendarDay[]): PublicCalendarWorkplaceMonthDay[] {
+  return days.map((day) => ({
+    date: day.date,
+    workingSalonCount: 1,
+    freeSalonCount: day.freeStartCount > 0 ? 1 : 0,
+    freeStartCount: day.freeStartCount,
+    workplaces: [{ ...day, salonId }],
+  }));
+}
+
 export type PublicCalendarMonthMeta = {
   month: string;
   from: string;

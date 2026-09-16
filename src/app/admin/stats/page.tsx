@@ -14,7 +14,7 @@ export default async function AdminStatsPage() {
   }
   return (
     <DashboardLayout role="admin" name={session.name}>
-      <StatsPanel endpoint="/api/stats/salon" />
+      <StatsPanel endpoint="/api/stats/salon" masterEndpoint="/api/stats/master" salonId={session.salonId} />
     </DashboardLayout>
   );
 }

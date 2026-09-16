@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TimeSlotStatus } from "@/server/domain/types";
-import { buildPublicDaySchedule, resolvePublicCalendarMonth } from "@/server/application/public-calendar";
+import { attachWorkplaceDays, buildPublicDaySchedule, resolvePublicCalendarMonth } from "@/server/application/public-calendar";
 
 describe("public calendar month window", () => {
   it("accepts the current month and rejects a far month", () => {
@@ -60,5 +60,35 @@ describe("public day schedule", () => {
       new Date("2026-09-03T06:00:00.000Z"),
     );
     expect(day.busy).toEqual([{ startTime: "10:00", endTime: "10:30" }]);
+  });
+
+  it("attaches a workplace to each working day", () => {
+    const days = attachWorkplaceDays("salon-1", [
+      {
+        date: "2026-09-03",
+        windows: [{ startTime: "10:00", endTime: "18:00" }],
+        busy: [],
+        starts: [{ startTime: "10:00", endTime: "10:30" }],
+        freeStartCount: 1,
+      },
+    ]);
+    expect(days).toEqual([
+      {
+        date: "2026-09-03",
+        workingSalonCount: 1,
+        freeSalonCount: 1,
+        freeStartCount: 1,
+        workplaces: [
+          {
+            date: "2026-09-03",
+            salonId: "salon-1",
+            windows: [{ startTime: "10:00", endTime: "18:00" }],
+            busy: [],
+            starts: [{ startTime: "10:00", endTime: "10:30" }],
+            freeStartCount: 1,
+          },
+        ],
+      },
+    ]);
   });
 });

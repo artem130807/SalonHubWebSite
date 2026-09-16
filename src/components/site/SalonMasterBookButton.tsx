@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { useBooking } from "@/components/BookingProvider";
+import { bookingCallToAction } from "@/lib/booking-access";
 import { ratingCountLabel } from "@/lib/locale";
 
 export function SalonMasterBookButton({
@@ -22,7 +23,7 @@ export function SalonMasterBookButton({
   ratingCount: number;
   avatarUrl?: string | null;
 }) {
-  const { openBooking } = useBooking();
+  const { openBooking, access } = useBooking();
   return (
     <article className="bg-surface border border-outline rounded-3xl p-5 shadow-sm hover:border-primary/40 transition-colors">
       <div className="flex items-center gap-4">
@@ -61,7 +62,7 @@ export function SalonMasterBookButton({
           onClick={() => openBooking(salonId, masterId)}
           className="bg-primary text-onPrimary rounded-2xl py-2.5 text-sm font-bold hover:bg-primaryVariant"
         >
-          Записаться
+          {bookingCallToAction(access, "Записаться")}
         </button>
       </div>
     </article>

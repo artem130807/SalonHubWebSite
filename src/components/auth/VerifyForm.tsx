@@ -10,6 +10,7 @@ export function VerifyForm() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
   const hint = searchParams.get("hint");
+  const from = searchParams.get("from") ?? "";
   const [state, action, pending] = useActionState(verifyAction, initial);
 
   return (
@@ -21,6 +22,7 @@ export function VerifyForm() {
       )}
       {state.error && <p className="text-sm text-error">{state.error}</p>}
       <input type="hidden" name="email" value={email} />
+      {from && <input type="hidden" name="from" value={from} />}
       <label className="block space-y-2">
         <span className="text-sm font-medium">Код из письма</span>
         <input name="code" required className="w-full bg-surfaceVariant border border-outline rounded-xl px-4 py-3 outline-none focus:border-primary" />

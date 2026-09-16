@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { UserRole } from "@/server/domain/types";
 import { getApp } from "@/server/infrastructure/get-app";
+import { parseInternalPath } from "@/lib/safe-path";
 import { createAuthCookies, revokeAndClearSession } from "@/lib/session";
 
 export type AuthFormState = {
@@ -36,7 +37,11 @@ export async function registerAction(
     process.env.NODE_ENV !== "production",
   );
   if (!result.ok) return { error: result.error };
-  redirect(`/verify?email=${encodeURIComponent(parsed.data.email)}${result.value.verificationCode ? `&hint=${result.value.verificationCode}` : ""}`);
+  const from = parseInternalPath(formData.get("from"));
+  const next = new URLSearchParams({ email: parsed.data.email });
+  if (result.value.verificationCode) next.set("hint", result.value.verificationCode);
+  if (from) next.set("from", from);
+  redirect(`/verify?${next.toString()}`);
 }
 
 export async function verifyAction(
@@ -47,7 +52,10 @@ export async function verifyAction(
   const code = String(formData.get("code") ?? "");
   const result = await getApp().auth.verifyEmail(email, code);
   if (!result.ok) return { error: result.error };
-  redirect("/login?verified=1");
+  const from = parseInternalPath(formData.get("from"));
+  const next = new URLSearchParams({ verified: "1" });
+  if (from) next.set("from", from);
+  redirect(`/login?${next.toString()}`);
 }
 
 export async function loginAction(
@@ -61,8 +69,7 @@ export async function loginAction(
   await createAuthCookies(result.value);
   if (result.value.role === UserRole.SalonAdmin) redirect("/admin");
   if (result.value.role === UserRole.Master) redirect("/barber");
-  const from = String(formData.get("from") ?? "");
-  redirect(from.startsWith("/") && !from.startsWith("//") ? from : "/");
+  redirect(parseInternalPath(formData.get("from")) ?? "/");
 }
 
 export async function logoutAction() {

@@ -21,14 +21,15 @@ function nearestWindow(profile: PublicMasterProfile) {
   const upcoming =
     profile.calendar.days.find(
       (day) => day.date > profile.calendar.today || (day.date === profile.calendar.today && day.freeStartCount > 0),
-    ) ?? profile.calendar.days.find((day) => day.date >= profile.calendar.today && day.windows.length > 0);
+    ) ?? profile.calendar.days.find((day) => day.date >= profile.calendar.today && day.workingSalonCount > 0);
   if (!upcoming) return null;
-  const window = upcoming.windows[0];
+  const windows = upcoming.workplaces.flatMap((item) => item.windows);
+  const window = windows[0];
   if (!window) return null;
   return {
     date: upcoming.date,
     startTime: window.startTime,
-    endTime: upcoming.windows[upcoming.windows.length - 1]?.endTime ?? window.endTime,
+    endTime: windows[windows.length - 1]?.endTime ?? window.endTime,
     freeStartCount: upcoming.freeStartCount,
   };
 }

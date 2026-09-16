@@ -6,11 +6,12 @@ import { yearMonthOf } from "@/lib/date-only";
 import {
   activeAppointments,
   activeWindows,
+  attachWorkplaceDays,
   buildPublicDaysForMaster,
   previewDurationMinutes,
   resolvePublicCalendarMonth,
   utcRangeForCalendar,
-  type PublicCalendarDay,
+  type PublicCalendarWorkplaceMonthDay,
 } from "@/server/application/public-calendar";
 import type {
   IAppointmentRepository,
@@ -35,7 +36,7 @@ export type PublicMasterWorkplace = {
   closingTime: string | null;
 };
 
-export type { PublicCalendarDay, PublicCalendarInterval } from "@/server/application/public-calendar";
+export type { PublicCalendarDay, PublicCalendarInterval, PublicCalendarWorkplaceDay } from "@/server/application/public-calendar";
 
 export type PublicMasterCalendar = {
   month: string;
@@ -45,7 +46,8 @@ export type PublicMasterCalendar = {
   previewDurationMinutes: number;
   minMonth: string;
   maxMonth: string;
-  days: PublicCalendarDay[];
+  workplaces: PublicMasterWorkplace[];
+  days: PublicCalendarWorkplaceMonthDay[];
 };
 
 export type PublicMasterProfile = {
@@ -95,7 +97,7 @@ export class PublicMasterProfileService {
       this.reviews.listByMaster(master.id),
       this.promotions.listBySalon(salon.id),
     ]);
-    const calendar = await this.buildMonth(master.id, services, yearMonthOf(dateOnly(this.clock.utcNow())));
+    const calendar = await this.buildMonth(master, salon, services, yearMonthOf(dateOnly(this.clock.utcNow())));
     if (!calendar.ok) return calendar;
 
     return ok({
@@ -113,7 +115,7 @@ export class PublicMasterProfileService {
     const loaded = await this.loadWorkplace(masterId);
     if (!loaded.ok) return loaded;
     const services = await this.masterServices.getServicesForMaster(loaded.value.master.id);
-    return this.buildMonth(loaded.value.master.id, services, month);
+    return this.buildMonth(loaded.value.master, loaded.value.salon, services, month);
   }
 
   private async loadWorkplace(masterId: string) {
@@ -124,23 +126,23 @@ export class PublicMasterProfileService {
     return ok({ master, salon });
   }
 
-  private async buildMonth(masterId: string, services: Service[], month?: string | null) {
+  private async buildMonth(master: MasterProfile, salon: Salon, services: Service[], month?: string | null) {
     const meta = resolvePublicCalendarMonth(dateOnly(this.clock.utcNow()), month);
     if (!meta.ok) return meta;
     const range = utcRangeForCalendar(meta.value.from, meta.value.to);
     const [slots, appointments] = await Promise.all([
-      this.timeSlots.getByMasterAndDateRange(masterId, meta.value.from, meta.value.to),
-      this.appointments.list({ masterId, from: range.from, to: range.to }),
+      this.timeSlots.getByMasterAndDateRange(master.id, meta.value.from, meta.value.to),
+      this.appointments.list({ masterId: master.id, from: range.from, to: range.to }),
     ]);
     const duration = previewDurationMinutes(services);
+    const workplace = toPublicMasterWorkplace(salon);
     return ok({
       ...meta.value,
       previewDurationMinutes: duration,
-      days: buildPublicDaysForMaster(
-        activeWindows(slots),
-        activeAppointments(appointments),
-        duration,
-        this.clock.utcNow(),
+      workplaces: [workplace],
+      days: attachWorkplaceDays(
+        salon.id,
+        buildPublicDaysForMaster(activeWindows(slots), activeAppointments(appointments), duration, this.clock.utcNow()),
       ),
     } satisfies PublicMasterCalendar);
   }

@@ -145,7 +145,7 @@ export function createApp(deps: AppDeps) {
   const reviews = new ReviewService(deps.reviews, deps.appointments, deps.salons, deps.masters, deps.clock);
   const templates = new TemplateService(deps.templates, deps.masters, deps.timeSlots);
   const subscriptions = new SubscriptionService(deps.subscriptions, deps.masters, deps.salons, deps.users);
-  const stats = new StatsService(deps.appointments, deps.masters, deps.clock, deps.dailyStats);
+  const stats = new StatsService(deps.appointments, deps.masters, deps.timeSlots, deps.reviews, deps.clock);
   const dailyStatsJob = new DailyStatsJobService(
     deps.appointments,
     deps.salons,

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { withReturnTo } from "@/lib/safe-path";
 import { loginAction, type AuthFormState } from "@/app/actions/auth";
 
 const initial: AuthFormState = {};
@@ -43,7 +44,7 @@ export function LoginForm({ verified, from }: { verified?: boolean; from?: strin
       </button>
       <p className="text-sm text-onSurfaceVariant text-center">
         Нет аккаунта?{" "}
-        <Link href="/register" className="text-primary hover:underline">
+        <Link href={withReturnTo("/register", from)} className="text-primary hover:underline">
           Регистрация
         </Link>
       </p>

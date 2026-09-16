@@ -1,10 +1,15 @@
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { AuthScreen } from "@/components/auth/AuthScreen";
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const params = await searchParams;
   return (
     <AuthScreen title="Регистрация">
-      <RegisterForm />
+      <RegisterForm from={params.from} />
     </AuthScreen>
   );
 }

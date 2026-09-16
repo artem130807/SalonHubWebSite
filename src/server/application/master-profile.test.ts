@@ -103,9 +103,22 @@ describe("public master profile", () => {
     expect(profile.value.calendar.from).toBe("2026-08-31");
     expect(profile.value.calendar.days.map((day) => day.date)).toEqual(["2026-09-03"]);
     const day = profile.value.calendar.days[0];
-    expect(day?.windows).toEqual([{ startTime: "10:00", endTime: "18:00" }]);
-    expect(day?.busy).toEqual([{ startTime: "10:00", endTime: "10:30" }]);
-    expect(day?.freeStartCount).toBeGreaterThan(0);
+    const workplace = day?.workplaces[0];
+    expect(profile.value.calendar.workplaces).toEqual([
+      expect.objectContaining({
+        id: salon.value.id,
+        name: "Салон",
+        city: "Москва",
+        street: "Тверская",
+        building: "1",
+      }),
+    ]);
+    expect(day?.workingSalonCount).toBe(1);
+    expect(day?.freeSalonCount).toBe(1);
+    expect(workplace?.salonId).toBe(salon.value.id);
+    expect(workplace?.windows).toEqual([{ startTime: "10:00", endTime: "18:00" }]);
+    expect(workplace?.busy).toEqual([{ startTime: "10:00", endTime: "10:30" }]);
+    expect(workplace?.freeStartCount).toBeGreaterThan(0);
     expect(JSON.stringify(profile.value.calendar)).not.toContain("Клиент");
     expect(JSON.stringify(profile.value.calendar)).not.toContain(clientReg.value.email);
   });
