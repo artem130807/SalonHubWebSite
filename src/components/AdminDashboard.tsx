@@ -34,7 +34,7 @@ export function AdminDashboard({
       ) : (
         <div className="max-w-7xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold font-serif mb-2">Сводка салона</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold font-serif mb-2">Сводка салона</h1>
             <p className="text-onSurfaceVariant">{name}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -56,7 +56,27 @@ export function AdminDashboard({
               </p>
             </div>
           </div>
-          <div className="bg-card border border-outline rounded-2xl overflow-hidden">
+          <div className="space-y-3 md:hidden">
+            <h2 className="text-xl font-bold">Записи сегодня</h2>
+            {appointments.length === 0 && (
+              <p className="bg-card border border-outline rounded-2xl p-4 text-onSurfaceVariant">На сегодня записей нет</p>
+            )}
+            {appointments.map((b) => (
+              <article key={b.id} className="bg-card border border-outline rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-bold truncate">{b.clientName}</p>
+                    <p className="text-xs text-onSurfaceVariant">{b.serviceName}</p>
+                  </div>
+                  <p className="font-semibold shrink-0">{b.startTime}</p>
+                </div>
+                <p className="text-sm text-onSurfaceVariant mt-2">
+                  {b.masterName} · {b.status}
+                </p>
+              </article>
+            ))}
+          </div>
+          <div className="hidden md:block bg-card border border-outline rounded-2xl overflow-x-auto">
             <div className="p-6 border-b border-outline">
               <h2 className="text-xl font-bold">Записи сегодня</h2>
             </div>

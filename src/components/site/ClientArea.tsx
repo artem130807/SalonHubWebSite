@@ -15,7 +15,7 @@ const links = [
 export function ClientArea({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
       <nav className="hidden md:flex flex-wrap gap-2.5 mb-8">
         {links.map((link) => {
           const active =
@@ -39,7 +39,7 @@ export function ClientArea({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
-      <div className="bg-surface/30 rounded-3xl border border-outline/50 p-6 sm:p-8 shadow-sm">
+      <div className="bg-surface/30 rounded-2xl sm:rounded-3xl border border-outline/50 p-4 sm:p-8 shadow-sm">
         {children}
       </div>
     </div>

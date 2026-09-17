@@ -42,7 +42,7 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
 
   return (
     <SiteShell>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-10 sm:space-y-12">
         <section className="space-y-5">
           <Link href={`/salons/${salon.id}`} className="inline-flex items-center gap-2 text-sm font-medium text-onSurfaceVariant hover:text-primary transition-colors">
             ← {salon.name}
@@ -63,7 +63,7 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-primary">{master.specialization || "Мастер"}</p>
-                  <h1 className="text-4xl sm:text-5xl font-serif font-bold leading-tight">{master.userName}</h1>
+                  <h1 className="text-3xl sm:text-5xl font-serif font-bold leading-tight">{master.userName}</h1>
                   <p className="text-onSurfaceVariant mt-2">
                     Работает в{" "}
                     <Link href={`/salons/${salon.id}`} className="text-primary hover:underline">
@@ -127,7 +127,7 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
         )}
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Портфолио</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Портфолио</h2>
           <PhotoCarousel
             photos={portfolio}
             alt={`Работы мастера ${master.userName}`}
@@ -138,7 +138,7 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
         </section>
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Услуги мастера</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Услуги мастера</h2>
           {services.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Услуги пока не назначены</p>
           ) : (
@@ -166,7 +166,7 @@ export function MasterHome({ profile }: { profile: PublicMasterProfile }) {
         </section>
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Отзывы</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Отзывы</h2>
           {reviews.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Отзывов пока нет</p>
           ) : (

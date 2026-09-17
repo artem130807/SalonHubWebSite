@@ -236,7 +236,7 @@ export function MasterScheduleCalendar({
     <section className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-serif font-bold">Расписание</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold">Расписание</h2>
           <p className="text-onSurfaceVariant mt-1">Где и когда мастер принимает клиентов</p>
         </div>
         <button
@@ -251,7 +251,7 @@ export function MasterScheduleCalendar({
       <BookingAccessNote />
 
       {calendar.workplaces.length > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
           <FilterChip active={!workplaceId} onClick={() => setWorkplaceId("")} label="Все заведения" />
           {calendar.workplaces.map((workplace) => (
             <FilterChip
@@ -322,7 +322,7 @@ export function MasterScheduleCalendar({
                     aria-current={isToday ? "date" : undefined}
                     aria-label={dayLabel(date, day, roster, isToday)}
                     onClick={() => selectDate(date)}
-                    className={`relative min-h-[3.5rem] sm:min-h-[4.25rem] rounded-2xl px-1 py-1.5 flex flex-col items-center justify-start gap-0.5 transition-all ${
+                    className={`relative min-h-11 sm:min-h-[4.25rem] rounded-xl sm:rounded-2xl px-0.5 sm:px-1 py-1 sm:py-1.5 flex flex-col items-center justify-start gap-0.5 transition-all ${
                       isSelected
                         ? "bg-primary text-onPrimary shadow-[0_8px_20px_rgba(212,175,55,0.28)]"
                         : isToday
@@ -332,7 +332,7 @@ export function MasterScheduleCalendar({
                             : "hover:bg-surfaceVariant/60"
                     } ${outside && !isSelected ? "opacity-45" : ""} ${past && !isSelected ? "text-onSurfaceVariant" : ""}`}
                   >
-                    <span className={`text-sm font-bold leading-none ${isSelected ? "" : past ? "text-onSurfaceVariant" : ""}`}>
+                    <span className={`text-xs sm:text-sm font-bold leading-none ${isSelected ? "" : past ? "text-onSurfaceVariant" : ""}`}>
                       {dayOfMonth(date)}
                     </span>
                     {working && range && (
@@ -365,7 +365,7 @@ export function MasterScheduleCalendar({
           </div>
         </div>
 
-        <aside className="bg-surface border border-outline/50 rounded-[1.75rem] p-5 sm:p-6 shadow-sm flex flex-col min-h-[22rem]">
+        <aside className="bg-surface border border-outline/50 rounded-[1.75rem] p-4 sm:p-6 shadow-sm flex flex-col min-h-[18rem]">
           <p className="text-xs uppercase tracking-[0.18em] text-primary font-semibold">Выбранный день</p>
           <h3 className="text-2xl font-serif font-bold mt-1">{humanDate(selectedDate)}</h3>
           {error && <p className="text-sm text-error mt-3">{error}</p>}
@@ -386,13 +386,15 @@ export function MasterScheduleCalendar({
                       <Link href={`/salons/${workplace.id}`} className="font-bold hover:text-primary block">
                         {workplace.name}
                       </Link>
-                      <p className="text-xs text-onSurfaceVariant mt-1 inline-flex items-start gap-1.5">
+                      <p className="flex items-start gap-1.5 text-xs text-onSurfaceVariant mt-1 min-w-0">
                         <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                        {streetAddress(workplace)}
+                        <span className="min-w-0 break-words">{streetAddress(workplace)}</span>
                       </p>
-                      <p className="text-xs text-onSurfaceVariant mt-2 inline-flex items-start gap-1.5">
+                      <p className="flex items-start gap-1.5 text-xs text-onSurfaceVariant mt-1.5 min-w-0">
                         <Clock className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                        {item.windows.map((window) => `${formatClock(window.startTime)}–${formatClock(window.endTime)}`).join(", ")}
+                        <span className="min-w-0 break-words">
+                          {item.windows.map((window) => `${formatClock(window.startTime)}–${formatClock(window.endTime)}`).join(", ")}
+                        </span>
                       </p>
                       <DayTimeline windows={item.windows} busy={item.busy} compact />
                       <button
@@ -443,7 +445,7 @@ export function MasterScheduleCalendar({
                     : "Нет окна подходящей длины для выбранной услуги"}
                 </p>
               ) : (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {starts.slice(0, 18).map((slot) => (
                     <span
                       key={`${slot.startTime}-${slot.endTime}`}
@@ -481,7 +483,7 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
     <button
       type="button"
       onClick={onClick}
-      className={`px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+      className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
         active ? "bg-primary text-onPrimary border-primary" : "border-outline hover:border-primary/60"
       }`}
     >

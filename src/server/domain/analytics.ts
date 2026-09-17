@@ -1,6 +1,7 @@
-import { weekdayMonday0 } from "@/lib/date-only";
+import { addDateOnly, addMonths, weekdayMonday0, yearMonthOf } from "@/lib/date-only";
+import { utcRangeForDateOnly } from "@/server/domain/calendar";
 import { TimeSlotStatus, AppointmentStatus } from "@/server/domain/types";
-import { toMinutes } from "@/server/domain/scheduling";
+import { dateOnly, toMinutes } from "@/server/domain/scheduling";
 import { tallyAppointments } from "@/server/domain/stats";
 import { WEEKDAYS_SHORT } from "@/lib/locale";
 
@@ -96,27 +97,25 @@ export type AnalyticsReport = {
 };
 
 export function analyticsPeriodRange(period: AnalyticsPeriod, date: Date) {
-  const utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const today = dateOnly(date);
   if (period === "year") {
-    return {
-      from: new Date(Date.UTC(utc.getUTCFullYear(), 0, 1)),
-      to: new Date(Date.UTC(utc.getUTCFullYear() + 1, 0, 1)),
-      period,
-    };
+    const year = today.slice(0, 4);
+    return rangeBetween(`${year}-01-01`, `${Number(year) + 1}-01-01`, period);
   }
   if (period === "month") {
-    return {
-      from: new Date(Date.UTC(utc.getUTCFullYear(), utc.getUTCMonth(), 1)),
-      to: new Date(Date.UTC(utc.getUTCFullYear(), utc.getUTCMonth() + 1, 1)),
-      period,
-    };
+    const month = yearMonthOf(today);
+    return rangeBetween(`${month}-01`, `${addMonths(month, 1)}-01`, period);
   }
-  const weekday = (utc.getUTCDay() + 6) % 7;
-  const from = new Date(utc);
-  from.setUTCDate(utc.getUTCDate() - weekday);
-  const to = new Date(from);
-  to.setUTCDate(from.getUTCDate() + 7);
-  return { from, to, period };
+  const from = addDateOnly(today, -weekdayMonday0(today));
+  return rangeBetween(from, addDateOnly(from, 7), period);
+}
+
+function rangeBetween(fromDate: string, toDate: string, period: AnalyticsPeriod) {
+  return {
+    from: utcRangeForDateOnly(fromDate).from,
+    to: utcRangeForDateOnly(toDate).from,
+    period,
+  };
 }
 
 export function buildAnalyticsReport(input: {
@@ -137,11 +136,9 @@ export function buildAnalyticsReport(input: {
   const active = appointments.filter((item) => item.status !== AppointmentStatus.Cancelled);
   const windows = input.windows.filter((item) => item.status !== TimeSlotStatus.Cancelled);
 
-  const minSellable = Math.max(input.minSellableMinutes ?? shortestDuration(appointments) ?? 30, 15);
-  const windowMinutes = windows.reduce((sum, item) => sum + durationMinutes(item.startTime, item.endTime), 0);
-  const bookedMinutes = active.reduce((sum, item) => sum + durationMinutes(item.startTime, item.endTime), 0);
-  const unsellableMinutes = unsellableWindowMinutes(windows, active, minSellable);
-  const occupancyRate = windowMinutes > 0 ? clamp(bookedMinutes / windowMinutes) : 0;
+  const minSellable = Math.max(input.minSellableMinutes ?? shortestDuration(active) ?? 30, 15);
+  const coverage = windowCoverage(windows, active, minSellable);
+  const occupancyRate = coverage.windowMinutes > 0 ? clamp(coverage.bookedMinutes / coverage.windowMinutes) : 0;
 
   const clientVisits = new Map<string, number>();
   for (const item of completed) {
@@ -168,10 +165,10 @@ export function buildAnalyticsReport(input: {
     averageCheck: totals.completedCount ? Math.round(totals.revenue / totals.completedCount) : 0,
     cancellationRate: totals.totalCount ? cancelled.length / totals.totalCount : 0,
     occupancyRate,
-    windowMinutes,
-    bookedMinutes,
-    idleMinutes: Math.max(0, windowMinutes - bookedMinutes),
-    unsellableMinutes,
+    windowMinutes: coverage.windowMinutes,
+    bookedMinutes: coverage.bookedMinutes,
+    idleMinutes: coverage.idleMinutes,
+    unsellableMinutes: coverage.unsellableMinutes,
     uniqueClients,
     repeatClients,
     walkInCount,
@@ -223,35 +220,60 @@ function shortestDuration(appointments: AnalyticsAppointment[]) {
   return durations.length ? Math.min(...durations) : null;
 }
 
-function unsellableWindowMinutes(
+function windowCoverage(
   windows: AnalyticsWindow[],
   busy: Array<{ startTime: string; endTime: string; appointmentDate: Date; masterId: string }>,
   minSellable: number,
 ) {
-  let total = 0;
+  let windowMinutes = 0;
+  let bookedMinutes = 0;
+  let unsellableMinutes = 0;
   for (const window of windows) {
     const start = toMinutes(window.startTime);
     const end = toMinutes(window.endTime);
-    const inside = busy
-      .filter(
-        (item) =>
-          item.masterId === window.masterId &&
-          item.appointmentDate.toISOString().slice(0, 10) === window.scheduleDate,
-      )
-      .map((item) => ({
-        start: Math.max(start, toMinutes(item.startTime)),
-        end: Math.min(end, toMinutes(item.endTime)),
-      }))
-      .filter((item) => item.end > item.start)
-      .sort((left, right) => left.start - right.start);
+    if (end <= start) continue;
+    windowMinutes += end - start;
+    const blocks = mergeIntervals(
+      busy
+        .filter(
+          (item) =>
+            item.masterId === window.masterId &&
+            item.appointmentDate.toISOString().slice(0, 10) === window.scheduleDate,
+        )
+        .map((item) => ({
+          start: Math.max(start, toMinutes(item.startTime)),
+          end: Math.min(end, toMinutes(item.endTime)),
+        }))
+        .filter((item) => item.end > item.start),
+    );
     let cursor = start;
-    for (const block of inside) {
-      if (block.start > cursor && block.start - cursor < minSellable) total += block.start - cursor;
+    for (const block of blocks) {
+      if (block.start > cursor && block.start - cursor < minSellable) unsellableMinutes += block.start - cursor;
+      bookedMinutes += block.end - block.start;
       cursor = Math.max(cursor, block.end);
     }
-    if (end > cursor && end - cursor < minSellable) total += end - cursor;
+    if (end > cursor && end - cursor < minSellable) unsellableMinutes += end - cursor;
   }
-  return total;
+  return {
+    windowMinutes,
+    bookedMinutes,
+    idleMinutes: Math.max(0, windowMinutes - bookedMinutes),
+    unsellableMinutes,
+  };
+}
+
+function mergeIntervals(items: Array<{ start: number; end: number }>) {
+  const sorted = [...items].sort((left, right) => left.start - right.start || left.end - right.end);
+  const merged: Array<{ start: number; end: number }> = [];
+  for (const item of sorted) {
+    const last = merged[merged.length - 1];
+    if (!last || item.start > last.end) {
+      merged.push({ ...item });
+      continue;
+    }
+    last.end = Math.max(last.end, item.end);
+  }
+  return merged;
 }
 
 function emptyWindowDayCount(
@@ -286,7 +308,9 @@ function rankBy(items: Array<{ id: string; name: string; price: number }>, reven
 function hourBuckets(appointments: AnalyticsAppointment[]): HourBucket[] {
   const counts = Array.from({ length: 24 }, (_, hour) => ({ hour, count: 0 }));
   for (const item of appointments) {
-    const hour = Number(item.startTime.slice(0, 2));
+    const minutes = toMinutes(item.startTime);
+    if (!Number.isFinite(minutes)) continue;
+    const hour = Math.floor(minutes / 60);
     if (hour >= 0 && hour < 24) counts[hour]!.count += 1;
   }
   return counts.filter((item) => item.count > 0);

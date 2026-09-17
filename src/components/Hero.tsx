@@ -12,12 +12,12 @@ export function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-serif font-bold text-onBackground mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-serif font-bold text-onBackground mb-6 leading-tight">
             Лучшие салоны. <br />
             <span className="text-primary italic">В одном месте.</span>
           </h1>
 
-          <p className="text-xl text-onSurfaceVariant mb-10 leading-relaxed">
+          <p className="text-base sm:text-xl text-onSurfaceVariant mb-10 leading-relaxed">
             Единая платформа для поиска и онлайн-записи в салоны красоты, парикмахерские и барбершопы вашего города.
             Выбирайте салон по рейтингу, отзывам и локации.
           </p>

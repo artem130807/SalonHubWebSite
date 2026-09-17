@@ -115,12 +115,12 @@ export function StatsPanel({
     <div className="max-w-6xl space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold">Статистика</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold">Статистика</h1>
           <p className="text-onSurfaceVariant mt-1">
             {report?.scope === "master" ? "Личные показатели мастера" : "Сводка салона по записям, окнам и отзывам"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 [&>select]:w-full sm:[&>select]:w-auto">
           {masterEndpoint && masters.length > 0 && (
             <select
               value={masterId}
@@ -152,7 +152,7 @@ export function StatsPanel({
 
       {kpis && (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Kpi label="Выручка" value={money(kpis.revenue)} hint={`${kpis.completedCount} завершённых`} />
             <Kpi label="Средний чек" value={money(kpis.averageCheck)} hint={`${kpis.confirmedCount} ещё ждут визита`} />
             <Kpi label="Заполненность окон" value={percent(kpis.occupancyRate)} hint={`${hours(kpis.bookedMinutes)} из ${hours(kpis.windowMinutes)}`} />
@@ -237,9 +237,9 @@ export function StatsPanel({
 
 function Kpi({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="bg-surface border border-outline rounded-3xl p-5">
-      <p className="text-onSurfaceVariant text-sm">{label}</p>
-      <p className="text-2xl sm:text-3xl font-bold mt-1">{value}</p>
+    <div className="bg-surface border border-outline rounded-2xl sm:rounded-3xl p-4 sm:p-5">
+      <p className="text-onSurfaceVariant text-xs sm:text-sm">{label}</p>
+      <p className="text-xl sm:text-3xl font-bold mt-1 leading-tight">{value}</p>
       <p className="text-xs text-onSurfaceVariant mt-2">{hint}</p>
     </div>
   );
@@ -247,7 +247,7 @@ function Kpi({ label, value, hint }: { label: string; value: string; hint: strin
 
 function BarRow({ label, value, max, meta }: { label: string; value: number; max: number; meta?: string }) {
   return (
-    <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-3 text-sm">
+    <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_auto] sm:grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3 text-sm">
       <span className="text-onSurfaceVariant">{label}</span>
       <div className="h-2.5 rounded-full bg-outline/40 overflow-hidden">
         <div className="h-full bg-primary/80" style={{ width: `${Math.round((value / max) * 100)}%` }} />

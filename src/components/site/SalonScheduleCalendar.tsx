@@ -166,7 +166,7 @@ export function SalonScheduleCalendar({
     <section className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-serif font-bold">Расписание салона</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold">Расписание салона</h2>
           <p className="text-onSurfaceVariant mt-1">Свободные и занятые окна всех мастеров заведения</p>
         </div>
         <button
@@ -181,7 +181,7 @@ export function SalonScheduleCalendar({
       <BookingAccessNote />
 
       {calendar.masters.length > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
           <FilterChip active={!masterId} onClick={() => setMasterId("")} label="Все мастера" />
           {calendar.masters.map((master) => (
             <FilterChip
@@ -251,7 +251,7 @@ export function SalonScheduleCalendar({
                     aria-current={isToday ? "date" : undefined}
                     aria-label={salonDayLabel(date, day, isToday)}
                     onClick={() => selectDate(date)}
-                    className={`relative min-h-[3.5rem] sm:min-h-[4.35rem] rounded-2xl px-1 py-1.5 flex flex-col items-center justify-start gap-0.5 transition-all ${
+                    className={`relative min-h-11 sm:min-h-[4.35rem] rounded-xl sm:rounded-2xl px-0.5 sm:px-1 py-1 sm:py-1.5 flex flex-col items-center justify-start gap-0.5 transition-all ${
                       isSelected
                         ? "bg-primary text-onPrimary shadow-[0_8px_20px_rgba(212,175,55,0.28)]"
                         : isToday
@@ -261,7 +261,7 @@ export function SalonScheduleCalendar({
                             : "hover:bg-surfaceVariant/60"
                     } ${outside && !isSelected ? "opacity-45" : ""} ${past && !isSelected ? "text-onSurfaceVariant" : ""}`}
                   >
-                    <span className={`text-sm font-bold leading-none ${isSelected ? "" : past ? "text-onSurfaceVariant" : ""}`}>
+                    <span className={`text-xs sm:text-sm font-bold leading-none ${isSelected ? "" : past ? "text-onSurfaceVariant" : ""}`}>
                       {dayOfMonth(date)}
                     </span>
                     {working && (
@@ -294,7 +294,7 @@ export function SalonScheduleCalendar({
           </div>
         </div>
 
-        <aside className="bg-surface border border-outline/50 rounded-[1.75rem] p-5 sm:p-6 shadow-sm flex flex-col min-h-[22rem] max-h-[40rem] overflow-hidden">
+        <aside className="bg-surface border border-outline/50 rounded-[1.75rem] p-4 sm:p-6 shadow-sm flex flex-col min-h-[18rem] max-h-[min(70dvh,40rem)] overflow-hidden">
           <p className="text-xs uppercase tracking-[0.18em] text-primary font-semibold">Выбранный день</p>
           <h3 className="text-2xl font-serif font-bold mt-1">{humanDate(selectedDate)}</h3>
           {error && <p className="text-sm text-error mt-3">{error}</p>}
@@ -395,7 +395,7 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
     <button
       type="button"
       onClick={onClick}
-      className={`px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+      className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
         active ? "bg-primary text-onPrimary border-primary" : "border-outline hover:border-primary/60"
       }`}
     >

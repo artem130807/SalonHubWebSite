@@ -35,7 +35,7 @@ export function SalonHome({
 
   return (
     <SiteShell>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-10 sm:space-y-12">
         <section className="space-y-5">
           <Link href="/salons" className="inline-flex items-center gap-2 text-sm font-medium text-onSurfaceVariant hover:text-primary transition-colors">
             ← Все салоны
@@ -51,7 +51,7 @@ export function SalonHome({
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
               <div>
-                <h1 className="text-4xl sm:text-5xl font-serif font-bold leading-tight">{salon.name}</h1>
+                <h1 className="text-3xl sm:text-5xl font-serif font-bold leading-tight">{salon.name}</h1>
                 <div className="flex flex-col gap-2 mt-4">
                   <p className="flex items-center gap-2.5 text-onSurface">
                     <MapPin className="w-5 h-5 text-primary shrink-0" />
@@ -93,7 +93,7 @@ export function SalonHome({
         )}
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Акции и скидки</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Акции и скидки</h2>
           {promotions.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Сейчас акций нет</p>
           ) : (
@@ -128,7 +128,7 @@ export function SalonHome({
         </section>
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Мастера</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Мастера</h2>
           {masters.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Мастера пока не добавлены</p>
           ) : (
@@ -150,7 +150,7 @@ export function SalonHome({
         </section>
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Услуги</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Услуги</h2>
           {services.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Услуги пока не добавлены</p>
           ) : (
@@ -178,7 +178,7 @@ export function SalonHome({
         </section>
 
         <section>
-          <h2 className="text-3xl font-serif font-bold mb-6">Отзывы</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-6">Отзывы</h2>
           {reviews.length === 0 ? (
             <p className="text-onSurfaceVariant bg-surface/30 p-6 rounded-2xl text-center">Отзывов пока нет</p>
           ) : (

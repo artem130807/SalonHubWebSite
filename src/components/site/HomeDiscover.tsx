@@ -39,25 +39,25 @@ export function HomeDiscover({
 }) {
   return (
     <main>
-      <section className="relative pt-16 pb-12 overflow-hidden">
+      <section className="relative pt-8 sm:pt-16 pb-10 sm:pb-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-2xl sm:text-3xl font-serif font-bold">{greeting}</p>
           <p className="text-onSurfaceVariant mt-1 mb-8">{subtitle}</p>
-          <h1 className="text-5xl sm:text-7xl font-serif font-bold leading-tight mb-8">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-serif font-bold leading-tight mb-6 sm:mb-8">
             Лучшие салоны. <br className="hidden sm:block" /><span className="text-primary italic">В одном месте.</span>
           </h1>
-          <form action="/salons" className="max-w-4xl mt-12 w-full relative z-10 mx-auto">
+          <form action="/salons" className="max-w-4xl mt-8 sm:mt-12 w-full relative z-10 mx-auto">
             <div className="flex flex-col md:flex-row items-center bg-surface/80 backdrop-blur-xl border border-outline/50 rounded-[2rem] p-2 shadow-2xl transition-all hover:shadow-primary/5 hover:border-primary/30">
-              <label className="flex items-center gap-4 flex-1 w-full px-6 py-4 group">
-                <Search className="w-7 h-7 text-onSurfaceVariant group-focus-within:text-primary transition-colors" />
+              <label className="flex items-center gap-3 sm:gap-4 flex-1 w-full px-4 sm:px-6 py-3 sm:py-4 group">
+                <Search className="w-6 h-6 sm:w-7 sm:h-7 text-onSurfaceVariant group-focus-within:text-primary transition-colors" />
                 <input
                   name="q"
-                  placeholder="Поиск салона, услуги или мастера..."
-                  className="w-full bg-transparent outline-none text-xl placeholder:text-onSurfaceVariant/70"
+                  placeholder="Салон, услуга или мастер"
+                  className="w-full bg-transparent outline-none text-base sm:text-xl placeholder:text-onSurfaceVariant/70"
                 />
               </label>
-              <button type="submit" className="w-full md:w-auto bg-primary text-onPrimary px-12 py-5 md:ml-2 rounded-3xl font-bold text-xl hover:bg-primaryVariant transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)]">
+              <button type="submit" className="w-full md:w-auto bg-primary text-onPrimary px-8 sm:px-12 py-4 sm:py-5 md:ml-2 rounded-3xl font-bold text-base sm:text-xl hover:bg-primaryVariant transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)]">
                 Найти
               </button>
             </div>
@@ -92,7 +92,7 @@ export function HomeDiscover({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-8 gap-4">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold">
                 {city ? `Салоны в городе ${city}` : "Салоны"}
               </h2>
               <p className="text-onSurfaceVariant mt-2">Выберите салон, мастера и удобное время</p>
@@ -117,7 +117,7 @@ export function HomeDiscover({
 
       <section className="pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-8">Лучшие мастера</h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold mb-8">Лучшие мастера</h2>
           {masters.length === 0 ? (
             <p className="text-onSurfaceVariant">Мастера появятся после добавления в салоны.</p>
           ) : (

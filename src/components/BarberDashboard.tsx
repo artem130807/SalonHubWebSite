@@ -48,7 +48,7 @@ export function BarberDashboard({
     <DashboardLayout role="barber" name={name}>
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold font-serif mb-2">Привет, {name}!</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif mb-2">Привет, {name}!</h1>
           <p className="text-onSurfaceVariant">Расписание на сегодня</p>
           {publicProfileHref && (
             <Link href={publicProfileHref} className="inline-block mt-2 text-sm font-semibold text-primary hover:underline">
@@ -88,8 +88,8 @@ export function BarberDashboard({
             {appointments.map((apt) => (
               <div key={apt.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-surfaceVariant flex items-center justify-center border border-outline">
-                    <span className="text-lg font-bold text-primary">{apt.startTime}</span>
+                  <div className="w-16 h-16 rounded-xl bg-surfaceVariant flex items-center justify-center border border-outline shrink-0">
+                    <span className="text-sm sm:text-lg font-bold text-primary">{apt.startTime}</span>
                   </div>
                   <div>
                     <h4 className="text-lg font-bold flex items-center gap-2">

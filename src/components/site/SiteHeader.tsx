@@ -38,14 +38,14 @@ export function SiteHeader({ viewer }: { viewer: SiteViewer }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-outline/50 shadow-sm">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-outline/50 shadow-sm pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-6 h-20">
+        <div className="flex items-center justify-between gap-3 sm:gap-6 h-14 md:h-20">
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <div className="bg-primary/10 p-2 rounded-xl group-hover:bg-primary/20 transition-colors">
               <Scissors className="h-6 w-6 text-primary" />
             </div>
-            <span className="text-2xl font-serif font-bold tracking-wide">
+            <span className="text-xl md:text-2xl font-serif font-bold tracking-wide">
               SALON<span className="text-primary">HUB</span>
             </span>
           </Link>
@@ -115,8 +115,8 @@ export function SiteHeader({ viewer }: { viewer: SiteViewer }) {
             </Link>
           </div>
         </div>
-        <form onSubmit={onSearch} className="md:hidden pb-4">
-          <label className="flex items-center gap-3 w-full bg-surface/40 hover:bg-surface/60 border border-outline/50 hover:border-outline rounded-2xl px-5 py-3 focus-within:border-primary focus-within:bg-surface focus-within:shadow-[0_0_15px_rgba(212,175,55,0.1)] transition-all">
+        <form onSubmit={onSearch} className="md:hidden pb-3">
+          <label className="flex items-center gap-3 w-full bg-surface/40 hover:bg-surface/60 border border-outline/50 hover:border-outline rounded-2xl px-4 py-2.5 focus-within:border-primary focus-within:bg-surface focus-within:shadow-[0_0_15px_rgba(212,175,55,0.1)] transition-all">
             <Search className="w-5 h-5 text-onSurfaceVariant" />
             <input
               value={query}
@@ -153,7 +153,7 @@ export function ClientBottomNav({ viewer }: { viewer: SiteViewer }) {
         { href: "/login", label: "Войти", icon: LogIn, match: "prefix" as const },
       ];
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-surface border-t border-outline">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-surface/95 backdrop-blur-xl border-t border-outline pb-[env(safe-area-inset-bottom)]">
       <div className={`grid ${items.length > 3 ? "grid-cols-5" : "grid-cols-3"}`}>
         {items.map((item) => {
           const Icon = item.icon;
@@ -167,7 +167,7 @@ export function ClientBottomNav({ viewer }: { viewer: SiteViewer }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-2 text-[10px] ${active ? "text-primary font-semibold" : "text-onSurfaceVariant"}`}
+              className={`flex flex-col items-center justify-center min-h-14 py-2 text-[10px] ${active ? "text-primary font-semibold" : "text-onSurfaceVariant"}`}
             >
               <Icon className="w-4 h-4 mb-0.5" />
               {item.label}

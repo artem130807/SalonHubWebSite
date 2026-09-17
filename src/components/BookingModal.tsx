@@ -333,13 +333,13 @@ export function BookingModal({
   return (
     <dialog
       ref={dialogRef}
-      className="bg-transparent p-0 m-auto max-w-none border-0 backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+      className="bg-transparent p-0 m-auto max-md:m-0 max-w-none w-full md:w-auto h-dvh md:h-auto max-h-dvh border-0 backdrop:bg-black/70 backdrop:backdrop-blur-sm"
     >
-      <div className="bg-surface border border-outline rounded-[2rem] w-[95vw] max-w-2xl max-h-[92vh] shadow-2xl overflow-hidden text-onBackground flex flex-col">
-        <div className="flex justify-between items-center px-6 py-5 border-b border-outline/50">
+      <div className="bg-surface border-0 md:border border-outline rounded-none md:rounded-[2rem] w-full md:w-[95vw] max-w-2xl h-full md:h-auto md:max-h-[92vh] shadow-2xl overflow-hidden text-onBackground flex flex-col pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-outline/50">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">Онлайн-запись</p>
-            <h2 className="text-2xl font-bold font-serif mt-1">{titleForStep(step)}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold font-serif mt-1">{titleForStep(step)}</h2>
           </div>
           <button
             type="button"
@@ -352,7 +352,7 @@ export function BookingModal({
         </div>
 
         <ol
-          className="grid gap-2 px-6 pt-5"
+          className="grid gap-2 px-4 sm:px-6 pt-4 sm:pt-5"
           style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
         >
           {steps.map((item, index) => {
@@ -369,7 +369,7 @@ export function BookingModal({
           })}
         </ol>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-5">
           {error && <p className="text-sm font-medium text-error bg-error/10 px-4 py-3 rounded-xl">{error}</p>}
 
           {step === "salon" && (
@@ -512,7 +512,7 @@ export function BookingModal({
                         type="button"
                         disabled={past}
                         onClick={() => selectDay(day)}
-                        className={`rounded-2xl py-2.5 flex flex-col items-center gap-0.5 transition-colors ${
+                        className={`rounded-2xl py-2 sm:py-2.5 flex flex-col items-center gap-0.5 transition-colors min-h-12 ${
                           selected
                             ? "bg-primary text-onPrimary"
                             : past
@@ -583,7 +583,7 @@ export function BookingModal({
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-outline/50 flex gap-3">
+        <div className="px-4 sm:px-6 py-4 border-t border-outline/50 flex gap-3">
           {step !== "salon" && !(step === "master" && selectedSalonId) && (
             <button
               type="button"

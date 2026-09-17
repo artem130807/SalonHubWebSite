@@ -23,7 +23,7 @@ export async function SiteShell({
 
   return (
     <BookingProvider salons={salons} viewerRole={viewer?.role ?? null}>
-      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+      <div className="min-h-dvh flex flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <NotificationListener />
         <SiteHeader viewer={viewer} />
         <div className="flex-1">{children}</div>

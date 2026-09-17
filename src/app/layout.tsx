@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   title: "SalonHub — онлайн-запись в салоны красоты",
   description:
     "Единая платформа для поиска и онлайн-записи в лучшие салоны красоты, парикмахерские и барбершопы вашего города.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0d0d0d",
 };
 
 export default async function RootLayout({

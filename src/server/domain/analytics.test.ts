@@ -3,10 +3,23 @@ import { AppointmentStatus, TimeSlotStatus } from "@/server/domain/types";
 import { analyticsPeriodRange, buildAnalyticsReport } from "@/server/domain/analytics";
 
 describe("analyticsPeriodRange", () => {
-  it("starts the week on Monday UTC", () => {
+  it("starts the week on Monday in the app timezone", () => {
     const range = analyticsPeriodRange("week", new Date("2026-09-03T12:00:00.000Z"));
     expect(range.from.toISOString()).toBe("2026-08-31T00:00:00.000Z");
     expect(range.to.toISOString()).toBe("2026-09-07T00:00:00.000Z");
+  });
+
+  it("uses the local calendar date when UTC is still the previous day", () => {
+    const previous = process.env.APP_TIMEZONE;
+    process.env.APP_TIMEZONE = "Europe/Moscow";
+    try {
+      const range = analyticsPeriodRange("week", new Date("2026-09-06T22:00:00.000Z"));
+      expect(range.from.toISOString()).toBe("2026-09-07T00:00:00.000Z");
+      expect(range.to.toISOString()).toBe("2026-09-14T00:00:00.000Z");
+    } finally {
+      if (previous === undefined) delete process.env.APP_TIMEZONE;
+      else process.env.APP_TIMEZONE = previous;
+    }
   });
 });
 
@@ -116,6 +129,47 @@ describe("buildAnalyticsReport", () => {
     expect(report.masters[0]?.name).toBe("Алекс");
     expect(report.masters[0]?.share).toBeGreaterThan(0.7);
     expect(report.insights.some((item) => item.id === "revenue-concentration")).toBe(true);
+  });
+
+  it("clips overlapping visits to the open window and merges busy intervals", () => {
+    const report = buildAnalyticsReport({
+      period: "week",
+      from: new Date("2026-08-31T00:00:00.000Z"),
+      to: new Date("2026-09-07T00:00:00.000Z"),
+      scope: "master",
+      appointments: [
+        visit({ id: "a1", startTime: "09:30", endTime: "10:30" }),
+        visit({ id: "a2", startTime: "10:15", endTime: "11:30", clientId: "c2" }),
+      ],
+      windows: [
+        {
+          id: "w1",
+          masterId: "m1",
+          scheduleDate: "2026-09-03",
+          startTime: "10:00",
+          endTime: "11:00",
+          status: TimeSlotStatus.Available,
+        },
+      ],
+      reviews: [],
+    });
+    expect(report.kpis.windowMinutes).toBe(60);
+    expect(report.kpis.bookedMinutes).toBe(60);
+    expect(report.kpis.occupancyRate).toBe(1);
+    expect(report.hours[0]).toMatchObject({ hour: 9, count: 1 });
+  });
+
+  it("parses unpadded start hours for demand buckets", () => {
+    const report = buildAnalyticsReport({
+      period: "week",
+      from: new Date("2026-08-31T00:00:00.000Z"),
+      to: new Date("2026-09-07T00:00:00.000Z"),
+      scope: "master",
+      appointments: [visit({ startTime: "9:00", endTime: "9:30" })],
+      windows: [],
+      reviews: [],
+    });
+    expect(report.hours).toEqual([{ hour: 9, count: 1 }]);
   });
 });
 
